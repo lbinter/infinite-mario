@@ -1,0 +1,18 @@
+spring:
+  main:
+    web-application-type: reactive
+  webflux:
+    static-path-pattern: "/**"
+  web:
+    resources:
+      static-locations:
+      - "classpath:/static/"
+logging:
+  file:
+    name: mario.log
+    path: C:\Users\lucas\Documents\Universität\SS2023\CG\project\
+  level:
+    root: ERROR
+    org.springframework.web: ERROR
+    at.jku.cg.binter.infinitemario: DEBUG
+    reactor.Flux.Map: DEBUG
