@@ -6,6 +6,9 @@
 var Mario = {};
 var CurrentLevel = {};
 var logger = {};
+var levelMap = new Map();
+
+var testVar = null;
 
 // points
 var P_ENEMY_LOST_WINGS = 50;

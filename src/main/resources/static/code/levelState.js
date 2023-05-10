@@ -37,8 +37,19 @@ Mario.LevelState.prototype = new Enjine.GameState();
 
 Mario.LevelState.prototype.Enter = function () {
     logger.logKeys = true;
-    var levelGenerator = new Mario.LevelGenerator(320, 15), i = 0, scrollSpeed = 0, w = 0, h = 0, bgLevelGenerator = null;
-    this.Level = levelGenerator.CreateLevel(this.LevelType, this.LevelDifficulty);
+
+    this.Level = levelMap.get(Mario.MarioCharacter.LevelString);
+    if (this.Level == null) {
+        console.log("Generating Level for \"" + Mario.MarioCharacter.LevelString + "\"");
+        var levelGenerator = new Mario.LevelGenerator(320, 15), i = 0, scrollSpeed = 0, w = 0, h = 0, bgLevelGenerator = null;
+        this.Level = levelGenerator.CreateLevel(this.LevelType, this.LevelDifficulty);
+        this.Level.Save();
+        levelMap.set(Mario.MarioCharacter.LevelString, this.Level);
+        logger.level(Mario.MarioCharacter.LevelString, this.Level);
+        testVar = this.Level;
+    } else {
+        this.Level.Reset();
+    }
 
     //play music here
     if (this.LevelType === Mario.LevelType.Overground) {
@@ -81,11 +92,10 @@ Mario.LevelState.prototype.Enter = function () {
     this.GotoMapState = false;
     this.GotoLoseState = false;
     logger.start();
+    logger.enablePositionLog();
 };
 
 Mario.LevelState.prototype.Exit = function () {
-
-    logger.finished();
     logger.logKeys = false;
 
     delete this.Level;
@@ -429,8 +439,10 @@ Mario.LevelState.prototype.Bump = function (x, y, canBreakBricks) {
             Enjine.Resources.PlaySound("sprout");
             if (!Mario.MarioCharacter.Large) {
                 this.AddSprite(new Mario.Mushroom(this, x * 16 + 8, y * 16 + 8));
+                logger.powerupSpawned("mushroom");
             } else {
                 this.AddSprite(new Mario.FireFlower(this, x * 16 + 8, y * 16 + 8));
+                logger.powerupSpawned("flower");
             }
         } else {
             Mario.MarioCharacter.GetCoin();
@@ -470,6 +482,7 @@ Mario.LevelState.prototype.BumpInto = function (x, y) {
 
 Mario.LevelState.prototype.CheckForChange = function (context) {
     if (this.GotoLoseState) {
+        logger.gameOver();
         context.ChangeState(new Mario.LoseState());
     }
     else {
