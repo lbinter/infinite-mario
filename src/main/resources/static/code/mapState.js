@@ -16,10 +16,12 @@ Mario.MapState = function() {
 
     this.Level = [];
     this.Data = [];
+    this.CastleData = [];
     this.XMario = 0; this.YMario = 0;
     this.XMarioA = 0; this.YMarioA = 0;
     this.MoveTime = 0;
     this.LevelId = 0;
+    this.CastleId = 0;
     this.Farthest = 0;
     this.XFarthestCap = 0;
     this.YFarthestCap = 0;
@@ -165,6 +167,7 @@ Mario.MapState.prototype.GenerateLevel = function() {
     for (x = 0; x < width; x++) {
         this.Level[x] = [];
         this.Data[x] = [];
+        this.CastleData[x] = [];
 
         for (y = 0; y < height; y++) {
 
@@ -174,6 +177,7 @@ Mario.MapState.prototype.GenerateLevel = function() {
             t = td * 2;
 
             this.Level[x][y] = t > 0 ? Mario.MapTile.Water : Mario.MapTile.Grass;
+            this.CastleData[x][y] = 0;
         }
     }
 
@@ -349,6 +353,7 @@ Mario.MapState.prototype.Travel = function(x, y, dir, depth) {
         if (this.Data[x][y] > 0) {
             if (this.LevelId !== 0 && ((Math.random() * 4) | 0) === 0) {
                 this.Data[x][y] = -3;
+                this.CastleData[x][y] = ++this.CastleId;
             } else {
                 this.Data[x][y] = ++this.LevelId;
             }
@@ -507,6 +512,7 @@ Mario.MapState.prototype.Update = function(delta) {
                             Mario.MarioCharacter.LevelString += "?";
                         } else {
                             Mario.MarioCharacter.LevelString += "#";
+                            Mario.MarioCharacter.LevelString += this.CastleData[x][y];
                             difficulty += 1;
                         }
 
@@ -655,6 +661,7 @@ Mario.MapState.prototype.GetY = function() {
 
 Mario.MapState.prototype.CheckForChange = function(context) {
     if (this.WorldNumber === 8) {
+        logger.winState();
         context.ChangeState(new Mario.WinState());
     }
     if (this.EnterLevel) {
