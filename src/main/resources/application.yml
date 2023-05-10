@@ -7,12 +7,16 @@ spring:
     resources:
       static-locations:
       - "classpath:/static/"
+mario:
+  logFolder: "C:\\Users\\"
 logging:
   file:
     name: mario.log
-    path: C:\Users\lucas\Documents\Universität\SS2023\CG\project\
+    path: "C:\\Users\\"
   level:
     root: ERROR
     org.springframework.web: ERROR
     at.jku.cg.binter.infinitemario: DEBUG
+    at.jku.cg.binter.infinitemario.io: DEBUG
+    at.jku.cg.binter.infinitemario.log: DEBUG
     reactor.Flux.Map: DEBUG
