@@ -70,7 +70,7 @@ Mario.BulletBill.prototype.Move = function() {
     
     this.Xa = this.Facing * sideWaysSpeed;
     this.XFlip = this.Facing === -1;
-    this.Move(this.Xa, 0);
+    this.SubMove(this.Xa, 0);
 };
 
 Mario.BulletBill.prototype.SubMove = function(xa, ya) {
