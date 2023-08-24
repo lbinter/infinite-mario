@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Infinite Mario - Level Editor - JavaScript</title>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="webjars/bootstrap/js/bootstrap.min.js" defer></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js" defer></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js" defer></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js" defer></script>
+    <link href="webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .container-main {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .container-canvas {
+            margin: 0 auto;
+            width: 95%;
+        }
+
+        canvas {
+            border: 0px solid #333;
+        }
+
+        #editorChooser {
+            border: 1px solid #333;
+        }
+    </style>
+
+    <!-- Enjine Includes -->
+    <script src="Enjine/core.js" defer></script>
+    <script src="Enjine/gameCanvas.js" defer></script>
+    <script src="Enjine/keyboardInput.js" defer></script>
+    <script src="Enjine/resources.js" defer></script>
+    <script src="Enjine/drawable.js" defer></script>
+    <script src="Enjine/state.js" defer></script>
+    <script src="Enjine/gameTimer.js" defer></script>
+    <script src="Enjine/camera.js" defer></script>
+    <script src="Enjine/drawableManager.js" defer></script>
+    <script src="Enjine/sprite.js" defer></script>
+    <script src="Enjine/spriteFont.js" defer></script>
+    <script src="Enjine/frameSprite.js" defer></script>
+    <script src="Enjine/animatedSprite.js" defer></script>
+    <script src="Enjine/collideable.js" defer></script>
+    <script src="Enjine/application.js" defer></script>
+
+    <!-- Actual game code -->
+    <script src="code/setup.js" defer></script>
+    <script src="code/logger.js" defer></script>
+    <script src="code/spriteCuts.js" defer></script>
+    <script src="code/level.js" defer></script>
+    <script src="code/backgroundGenerator.js" defer></script>
+    <script src="code/backgroundRenderer.js" defer></script>
+    <script src="code/improvedNoise.js" defer></script>
+    <script src="code/notchSprite.js" defer></script>
+    <script src="code/character.js" defer></script>
+    <script src="code/levelRenderer.js" defer></script>
+    <script src="code/levelGenerator.js" defer></script>
+    <script src="code/spriteTemplate.js" defer></script>
+    <script src="code/enemy.js" defer></script>
+    <script src="code/fireball.js" defer></script>
+    <script src="code/sparkle.js" defer></script>
+    <script src="code/coinAnim.js" defer></script>
+    <script src="code/mushroom.js" defer></script>
+    <script src="code/particle.js" defer></script>
+    <script src="code/fireFlower.js" defer></script>
+    <script src="code/bulletBill.js" defer></script>
+    <script src="code/flowerEnemy.js" defer></script>
+    <script src="code/shell.js" defer></script>
+
+    <script src="code/titleState.js" defer></script>
+    <script src="code/loadingState.js" defer></script>
+    <script src="code/loseState.js" defer></script>
+    <script src="code/winState.js" defer></script>
+    <script src="code/mapState.js" defer></script>
+    <script src="code/levelState.js" defer></script>
+
+    <script src="editor/editorState.js" defer></script>
+    <script src="editor/editorChooserRenderer.js" defer></script>
+    <script src="editor/editorChooserState.js" defer></script>
+    <script src="editor/editorRenderer.js" defer></script>
+    <script src="editor/editor.js" defer></script>
+
+    <script src="code/music.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <form class="d-flex">
+                <select id="level-difficulty" class="form-select me-2">
+                    <option value="-1">Level Difficulty</option>
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
+                <select id="level-type" class="form-select me-2">
+                    <option value="-1">Level Type</option>
+                    <option value="0" selected>Overground</option>
+                    <option value="1">Underground</option>
+                    <option value="2">Castle</option>
+                </select>
+                <button id="level-generate" type="button" class="btn btn-primary me-4">Generate</button>
+                <button id="level-generate-empty" type="button" class="btn btn-primary me-4">Empty</button>
+                <button id="level-save" type="button" class="btn btn-primary me-2">Save</button>
+                <input id="level-load" class="form-control" type="file">
+            </form>
+            <form class="d-flex justify-content-end">
+                <div class="form-check form-switch me-2">
+                    <input id="level-paused" class="btn-check" type="checkbox">
+                    <label class="btn btn-outline-primary" for="level-paused">Paused</label>
+                </div>
+                <div class="form-check form-switch me-1">
+                    <input id="level-bg" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-bg">Background</label>
+                </div>
+                <div class="form-check form-switch me-1">
+                    <input id="level-grid" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-grid">Grid</label>
+                </div>
+                <input id="level-grid-color" type="color" value="#000000" title="Grid color"
+                    class="form-control form-control-color me-1" />
+                <input id="level-grid-active-color" type="color" value="#FF0000" title="Grid active color"
+                    class="form-control form-control-color me-1" />
+                <div class="form-check form-switch me-2">
+                    <input id="level-grid-number" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-grid-number">Grid Number</label>
+                </div>
+                <input id="level-grid-number-color" type="color" value="#FFFFFF" title="Grid number color"
+                    class="form-control form-control-color me-2" />
+            </form>
+        </div>
+    </nav>
+    <div class="container-main">
+        <div id="editorCanvas" class="container-canvas">
+            <canvas id="canvas" width="640" height="480">
+                <p>Your browser does not support the canvas element.</p>
+            </canvas>
+        </div>
+    </div>
+    <div class="container text-center mt-4">
+        <div class="row">
+            <div class="col-8">
+                <canvas id="editorChooser" width="640" height="480">
+                    <p>Your browser does not support the canvas element.</p>
+                </canvas>
+            </div>
+            <div class="col-4">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="col-form-label me-1" for="level-exit-x">Level Exit X/Y: </label>
+                    </div>
+                    <div class="col-3">
+                        <input id="level-exit-x" class="form-control form-control-sm me-2" size="2" maxlength="2"
+                            value="280" type="number" min="1" max="320" />
+                    </div>
+                    <div class="col-2">
+                        <input id="level-exit-y" class="form-control form-control-sm me-2" size="2" maxlength="2"
+                            value="10" type="number" min="1" max="15" />
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <label class="col-form-label me-1" for="level-grid-length-x">Selection Size:
+                            </label>
+                        </div>
+                        <div class="col-2">
+                            <input id="level-grid-length-x" class="form-control form-control-sm me-2" size="2"
+                                maxlength="2" value="1" type="number" min="1" max="15" />
+                        </div>
+                        <div class="col-2">
+                            <input id="level-grid-length-y" class="form-control form-control-sm me-4" size="2"
+                                maxlength="2" value="1" type="number" min="1" max="15" />
+                        </div>
+                    </div>
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <div class="form-check form-switch me-2">
+                                <input id="level-delete" class="btn-check" type="checkbox">
+                                <label class="btn btn-outline-primary" for="level-delete">Delete Mode</label>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-check form-switch me-2">
+                                <input id="level-smart-paste" class="form-check-input" type="checkbox" checked>
+                                <label class="form-check-label" for="level-smart-paste">Smart Paste</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <button id="editor-clear" type="button" class="btn btn-primary me-3">Clear
+                                selection</button>
+                        </div>
+                        <div class="col-6">
+
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <select id="enemy-type" class="form-select me-2">
+                                <option value="-1">Enemy</option>
+                                <option value="0">0: Red Koopa</option>
+                                <option value="1">1: Green Koopa</option>
+                                <option value="2">2: Goomba</option>
+                                <option value="3">3: Spiky</option>
+                                <option value="4">4: Flower</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check form-switch me-2">
+                                <input id="enemy-winged" class="form-check-input" type="checkbox">
+                                <label class="form-check-label" for="enemy-winged">Winged</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <div class="form-check form-switch me-2">
+                                <input id="enemy-add" class="btn-check" type="checkbox">
+                                <label class="btn btn-outline-primary" for="enemy-add">Enemy Mode</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>

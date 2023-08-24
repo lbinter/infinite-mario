@@ -169,7 +169,7 @@ Mario.Odds = {
 Mario.Level = function (width, height) {
     this.Width = width;
     this.Height = height;
-    this.ExitX = 10;
+    this.ExitX = -1;
     this.ExitY = 10;
 
     this.Map = [];
@@ -219,7 +219,11 @@ Mario.Level.prototype = {
         if (y < 0) { return 0; }
         if (x >= this.Width) { x = this.Width - 1; }
         if (y >= this.Height) { y = this.Height - 1; }
-        return this.Map[x][y];
+        if (this.Map[x]) {
+            return this.Map[x][y];
+        } else {
+            return 0;
+        }
     },
 
     SetBlock: function (x, y, block) {
@@ -264,7 +268,6 @@ Mario.Level.prototype = {
     },
 
     Save: function () {
-        console.log("called save");
         this.levelMap = [];
         this.levelData = [];
         this.levelSpriteTemplates = [];
@@ -289,7 +292,6 @@ Mario.Level.prototype = {
     },
 
     Reset: function () {
-        console.log("called reset");
         this.Map = [];
         this.Data = [];
         this.SpriteTemplates = [];

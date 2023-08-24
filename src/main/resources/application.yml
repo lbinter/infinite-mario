@@ -1,22 +1,24 @@
 spring:
-  main:
-    web-application-type: reactive
   webflux:
     static-path-pattern: "/**"
   web:
     resources:
       static-locations:
       - "classpath:/static/"
+
 mario:
-  logFolder: "C:\\Users\\"
+    logFolder: "home\\logs"
+    displayScore: true
+
 logging:
   file:
     name: mario.log
-    path: "C:\\Users\\"
+    path: "home\\logs"
   level:
     root: ERROR
     org.springframework.web: ERROR
-    at.jku.cg.binter.infinitemario: DEBUG
-    at.jku.cg.binter.infinitemario.io: DEBUG
-    at.jku.cg.binter.infinitemario.log: DEBUG
-    reactor.Flux.Map: DEBUG
+    at.jku.cg.binter.infinitemario: ERROR
+    at.jku.cg.binter.infinitemario.io: ERROR
+    at.jku.cg.binter.infinitemario.log: ERROR
+    at.jku.cg.binter.infinitemario.log.session: ERROR
+    reactor.Flux.Map: ERROR

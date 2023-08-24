@@ -32,6 +32,8 @@ public class MarioEvent {
     public Integer lives;
     @JsonProperty("coins")
     public Integer coins;
+    @JsonProperty("points")
+    public Integer points;
 
     @JsonProperty("level_string")
     public String level_string;

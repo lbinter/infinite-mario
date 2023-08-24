@@ -21,8 +21,10 @@ public enum EventType {
     RUNNING_START("RUN_START"),
     RUNNING_STOP("RUN_STOP"),
     JUMP_START("JUMP_START"),
-    LANDING("JUMP_LAND"),
-    SESSION_CLOSE("SESSION_CLOSE");
+    JUMP_LAND("JUMP_LAND"),
+    SESSION_START("SESSION_START"),
+    SESSION_CLOSE("SESSION_CLOSE"),
+    SCORE("SCORE");
 
     @JsonValue
     public final String event;

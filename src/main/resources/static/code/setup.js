@@ -2,13 +2,14 @@
 	Just create the global mario object.
 	Code by Rob Kleffner, 2011
 */
-
+var editorApp = null;
+var editorChooserApp = null;
 var Mario = {};
 var CurrentLevel = {};
 var logger = {};
 var levelMap = new Map();
-
-var testVar = null;
+var editorState = null;
+var editorChooserState = null;
 
 // points
 var P_ENEMY_LOST_WINGS = 50;

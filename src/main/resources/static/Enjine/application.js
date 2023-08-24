@@ -1,9 +1,9 @@
 /**
-	Simple demo of the engine.
-	Code by Rob Kleffner, 2011
+    Simple demo of the engine.
+    Code by Rob Kleffner, 2011
 */
 
-Enjine.Application = function() {
+Enjine.Application = function () {
     this.canvas = null;
     this.timer = null;
     this.stateContext = null;
@@ -11,27 +11,28 @@ Enjine.Application = function() {
 };
 
 Enjine.Application.prototype = {
-    Update: function(delta) {
-        
+    Update: function (delta) {
+
         this.stateContext.Update(delta);
-        
+
         this.canvas.BeginDraw();
-        
+
         this.stateContext.Draw(this.canvas.BackBufferContext2D);
-        
+
         this.canvas.EndDraw();
     },
-    
-    Initialize: function(defaultState, resWidth, resHeight) {
+
+    Initialize: function (defaultState, resWidth, resHeight, appName, canvasName = "canvas",) {
         this.canvas = new Enjine.GameCanvas();
         this.timer = new Enjine.GameTimer();
-        Enjine.KeyboardInput.Initialize();      
-        this.canvas.Initialize("canvas", resWidth, resHeight);
+        Enjine.KeyboardInput.Initialize();
+        this.canvas.Initialize(canvasName, resWidth, resHeight);
         this.timer.UpdateObject = this;
-        
+
         this.stateContext = new Enjine.GameStateContext(defaultState);
-        
+
         this.timer.Start();
 
+        return this;
     }
 };

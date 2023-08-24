@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import at.jku.cg.binter.infinitemario.config.MarioConfiguration;
 import at.jku.cg.binter.infinitemario.io.MarioLogWriter;
 import at.jku.cg.binter.infinitemario.log.event.EventType;
 import at.jku.cg.binter.infinitemario.log.event.MarioEvent;
@@ -14,7 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MarioSession {
-    public final String sessionID;
+    public final String sessionId;
+    public final MarioConfiguration config;
 
     private final ObjectMapper mapper;
     private MarioLogWriter writer;
@@ -23,8 +25,9 @@ public class MarioSession {
 
     private final List<MarioEvent> levelDataEvents = new ArrayList<>();
 
-    public MarioSession(String sessionID, ObjectMapper mapper) {
-        this.sessionID = sessionID;
+    public MarioSession(MarioConfiguration config, String sessionId, ObjectMapper mapper) {
+        this.config = config;
+        this.sessionId = sessionId;
         this.mapper = mapper;
     }
 
@@ -37,6 +40,7 @@ public class MarioSession {
                 levelDataEvents.add(event);
             }
         } else if (event.eventType == EventType.SESSION_CLOSE) {
+            events.add(event);
             writeToFile();
         } else {
             events.add(event);
@@ -59,6 +63,7 @@ public class MarioSession {
             if (writer == null)
                 return;
         }
+        log.info("Writing player session to {}", writer.getLogFile().getAbsolutePath());
 
         try {
             writeLevelData();
@@ -73,8 +78,7 @@ public class MarioSession {
 
     private void createWriter() {
         try {
-            writer = new MarioLogWriter("C:\\Users\\lucas\\Documents\\Universität\\SS2023\\CG\\project\\logs",
-                    sessionID + ".log");
+            writer = new MarioLogWriter(config.getLogFolder(), sessionId + ".log");
         } catch (IOException e) {
             log.error("Could not create file writer.", e);
             e.printStackTrace();

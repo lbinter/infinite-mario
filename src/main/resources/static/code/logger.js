@@ -2,6 +2,59 @@ function timeElapsed() {
     return CurrentLevel.TotalTimeLeft - CurrentLevel.TimeLeft;
 }
 
+var stompClient = null;
+var scoreEventSubscription = null;
+
+logger.startGame = function () {
+    $(document).ready(function () { new Enjine.Application().Initialize(new Mario.LoadingState(), 320, 240) });
+}
+
+function connectLogging(playername) {
+    let socket = new SockJS('/logging');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({ username: playername, }, function () {
+        console.log('Web Socket is connected to /logging');
+        stompClient.send('/mario/events', {}, JSON.stringify({ event: "SESSION_START" }));
+        scoreEventSubscription = stompClient.subscribe(
+            '/players/queue/messages',
+            function (message) {
+                console.log('received :: ' + message.body);
+            });
+        logger.isConnected = true;
+        $("#container-logo").hide();
+        $("#playername").attr('readonly', true);
+        $("#connectLogging").prop('disabled', true);
+        logger.startGame();
+        $("#container-survey").show();
+    });
+    stompClient.debug = function () { };//do nothing
+    socket.onclose = function () {
+        disconnectLogging();
+    };
+}
+
+$(function () {
+    $("#connectLogging").click(function () {
+        if (!logger.isConnected && $("#playername").val()) {
+            connectLogging($("#playername").val());
+        }
+    });
+    $("#disconnectLogging").click(function () {
+        disconnectLogging();
+    });
+});
+
+function disconnectLogging() {
+    stompClient.send('/mario/events', {}, JSON.stringify({ event: "SESSION_CLOSE" }));
+    if (scoreEventSubscription != null) {
+        scoreEventSubscription.unsubscribe();
+        scoreEventSubscription = null;
+    }
+    stompClient.disconnect();
+    console.log('Disconnected');
+    logger.isConnected = false;
+}
+
 logger.logKeys = false;
 logger.ws = null;
 logger.isConnected = false;
@@ -9,37 +62,16 @@ logger.url = function () {
     return ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/logging"
 }
 
-logger.connect = function () {
-    if (logger.isConnected) return;
-    ws = new WebSocket(logger.url());
-    ws.onopen = function () {
-        console.log("Info: Connection Established with '" + logger.url() + "'");
-        logger.isConnected = true;
-    };
-
-    ws.onclose = function (event) {
-        console.log("Info: Closing Connection.");
-        logger.isConnected = false;
-    };
-}
-
-logger.disconnect = function () {
-    if (ws != null) {
-        ws.close();
-        ws = null;
-    }
-}
-
 logger.log = function (message, replacer = null, stringify = true) {
-    if (ws != null) {
+    if (stompClient != null) {
         if (stringify) {
             if (replacer) {
-                ws.send(JSON.stringify(message, replacer));
+                stompClient.send('/mario/events', {}, JSON.stringify(message, replacer));
             } else {
-                ws.send(JSON.stringify(message));
+                stompClient.send('/mario/events', {}, JSON.stringify(message));
             }
         } else {
-            ws.send(message);
+            stompClient.send('/mario/events', {}, message);
         }
     } else {
         console.error('connection not established, please connect.');
@@ -47,10 +79,6 @@ logger.log = function (message, replacer = null, stringify = true) {
 }
 
 logger.start = function () {
-    console.log("Starting world " + Mario.MarioCharacter.LevelString +
-        " with " + Mario.MarioCharacter.Lives +
-        " lives, " + Mario.MarioCharacter.Coins +
-        " coin and time " + CurrentLevel.TimeLeft);
     let message = {
         event: "START",
         level: Mario.MarioCharacter.LevelString,
@@ -62,7 +90,6 @@ logger.start = function () {
 }
 
 logger.finished = function () {
-    console.log("Finished world with time " + CurrentLevel.TimeLeft + " left.");
     let message = {
         event: "WIN_WORLD",
         level: Mario.MarioCharacter.LevelString,
@@ -73,7 +100,7 @@ logger.finished = function () {
 
 
 logger.gameOver = function () {
-    console.log("Game Over.");
+    // console.log("Game Over.");
     let message = {
         event: "GAME_OVER"
     };
@@ -82,7 +109,7 @@ logger.gameOver = function () {
 
 
 logger.winState = function () {
-    console.log("Won with " + Mario.MarioCharacter.Lives + " left.");
+    //console.log("Won with " + Mario.MarioCharacter.Lives + " left.");
     let message = {
         event: "WIN"
     };
@@ -90,7 +117,7 @@ logger.winState = function () {
 }
 
 logger.died = function () {
-    console.log("Mario died at time " + timeElapsed());
+    // console.log("Mario died at time " + timeElapsed());
     let message = {
         event: "DEATH",
         time: timeElapsed()
@@ -99,7 +126,7 @@ logger.died = function () {
 }
 
 logger.powerupSpawned = function (pType) {
-    console.log("PowerUp " + pType + " spawned at time " + timeElapsed());
+    // console.log("PowerUp " + pType + " spawned at time " + timeElapsed());
     let message = {
         event: "POWERUP_SPAWNED",
         pType: pType,
@@ -109,7 +136,7 @@ logger.powerupSpawned = function (pType) {
 }
 
 logger.gainedMushroom = function () {
-    console.log("Gained PowerUp Mushroom at time " + timeElapsed());
+    //console.log("Gained PowerUp Mushroom at time " + timeElapsed());
     let message = {
         event: "POWERUP",
         pType: "mushroom",
@@ -119,7 +146,7 @@ logger.gainedMushroom = function () {
 }
 
 logger.gainedFlower = function () {
-    console.log("Gained PowerUp Flower at time " + timeElapsed());
+    //console.log("Gained PowerUp Flower at time " + timeElapsed());
     let message = {
         event: "POWERUP",
         pType: "flower",
@@ -129,7 +156,7 @@ logger.gainedFlower = function () {
 }
 
 logger.lostPowerUp = function () {
-    console.log("Lost PowerUp at time " + timeElapsed());
+    // console.log("Lost PowerUp at time " + timeElapsed());
     let message = {
         event: "POWERUP_LOST",
         time: timeElapsed()
@@ -138,7 +165,7 @@ logger.lostPowerUp = function () {
 }
 
 logger.gainedCoin = function () {
-    console.log("Gained coin " + Mario.MarioCharacter.Coins + " at time " + timeElapsed());
+    //console.log("Gained coin " + Mario.MarioCharacter.Coins + " at time " + timeElapsed());
     let message = {
         event: "COIN",
         coins: Mario.MarioCharacter.Coins,
@@ -148,7 +175,7 @@ logger.gainedCoin = function () {
 }
 
 logger.gainedLive = function () {
-    console.log("Gained live - new total " + Mario.MarioCharacter.Lives + " at time " + timeElapsed() + ". Coins set to 0.");
+    // console.log("Gained live - new total " + Mario.MarioCharacter.Lives + " at time " + timeElapsed() + ". Coins set to 0.");
     let message = {
         event: "LIVE",
         lives: Mario.MarioCharacter.Lives,
@@ -160,6 +187,26 @@ logger.gainedLive = function () {
 logger.keydown = function (key) {
     if (!logger.logKeys) return;
     console.log("KeyDown[" + key + "]")
+}
+
+logger.keyup = function (key) {
+    if (key == 75) { // == k key
+        logger.logKeys = !logger.logKeys;
+        if (logger.logKeys) {
+            console.log("Enabled key logging");
+        } else {
+            console.log("Disabled key logging");
+        }
+    } else if (key == 80) { // == p key
+        logger.logPostion = !logger.logPostion;
+        if (logger.logPostion) {
+            console.log("Enable positon logging");
+        } else {
+            console.log("Disabled positon logging");
+        }
+    }
+    if (!logger.logKeys) return;
+    console.log("KeyUp[" + key + "]")
 }
 
 logger.destroyBlock = function (x, y) {
@@ -198,7 +245,7 @@ logger.enemyDied = function (type, x, y, deathtype) {
             str += " by fireball.";
         }
     }
-    console.log(str);
+    //console.log(str);
     let message = {
         event: "ENEMY_DEATH",
         enemyType: type,
@@ -210,47 +257,27 @@ logger.enemyDied = function (type, x, y, deathtype) {
     this.log(message);
 }
 
-logger.keyup = function (key) {
-    if (key == 75) { // == k key
-        logger.logKeys = !logger.logKeys;
-        if (logger.logKeys) {
-            console.log("Enabled key logging");
-        } else {
-            console.log("Disabled key logging");
-        }
-    } else if (key == 80) { // == p key
-        logger.logPostion = !logger.logPostion;
-        if (logger.logPostion) {
-            console.log("Enable positon logging");
-        } else {
-            console.log("Disabled positon logging");
-        }
-    }
-    if (!logger.logKeys) return;
-    console.log("KeyUp[" + key + "]")
-}
-
 logger.lastX = 0;
 logger.lastY = 0;
 logger.logPostion = true;
 logger.position = function (x, y) {
     if (!logger.logPostion) return;
     let str = "Pos[Time:" + timeElapsed() + ",";
-    let printLog = false;
+    let posChanged = false;
     if (logger.lastX != x) {
         logger.lastX = x;
         str += "X:" + x;
-        printLog = true;
+        posChanged = true;
     }
     if (logger.lastY != y) {
         logger.lastY = y;
-        if (printLog) str += ",";
+        if (posChanged) str += ",";
         str += "Y:" + y;
-        printLog = true;
+        posChanged = true;
     }
     str += "]";
-    if (printLog) {
-        console.log(str);
+    if (posChanged) {
+        // console.log(str);
         let message = {
             event: "POS",
             posX: x,
@@ -280,7 +307,6 @@ logger.level = function (level_string, level) {
             && key !== "levelData"
             && key !== "levelSpriteTemplates") { return value; }
     });
-    console.log("level:" + level);
 }
 
 logger.jumpStart = function (stomp = false) {
@@ -323,8 +349,6 @@ logger.runningStop = function () {
     this.log(message);
 }
 
-logger.connect();
-
 window.onbeforeunload = function () {
-    logger.disconnect();
+    disconnectLogging();
 }

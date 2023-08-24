@@ -37,16 +37,14 @@ Mario.LevelState.prototype = new Enjine.GameState();
 
 Mario.LevelState.prototype.Enter = function () {
     logger.logKeys = true;
-
+    var levelGenerator = new Mario.LevelGenerator(320, 15), i = 0, scrollSpeed = 0, w = 0, h = 0, bgLevelGenerator = null;
     this.Level = levelMap.get(Mario.MarioCharacter.LevelString);
     if (this.Level == null) {
-        console.log("Generating Level for \"" + Mario.MarioCharacter.LevelString + "\"");
-        var levelGenerator = new Mario.LevelGenerator(320, 15), i = 0, scrollSpeed = 0, w = 0, h = 0, bgLevelGenerator = null;
+        console.log("Generating Level for \"" + Mario.MarioCharacter.LevelString + "\" with type [" + this.LevelType + "] and difficulty [" + this.LevelDifficulty + "]");
         this.Level = levelGenerator.CreateLevel(this.LevelType, this.LevelDifficulty);
         this.Level.Save();
         levelMap.set(Mario.MarioCharacter.LevelString, this.Level);
         logger.level(Mario.MarioCharacter.LevelString, this.Level);
-        testVar = this.Level;
     } else {
         this.Level.Reset();
     }
@@ -73,7 +71,6 @@ Mario.LevelState.prototype.Enter = function () {
 
     this.FontShadow = Mario.SpriteCuts.CreateBlackFont();
     this.Font = Mario.SpriteCuts.CreateWhiteFont();
-
     for (i = 0; i < 2; i++) {
         scrollSpeed = 4 >> i;
         w = ((((this.Level.Width * 16) - 320) / scrollSpeed) | 0) + 320;
@@ -311,6 +308,7 @@ Mario.LevelState.prototype.Draw = function (context) {
         time = 0;
     }
 
+    // TODO config enable / disable
     this.DrawStringShadow(context, "MARIO " + Mario.MarioCharacter.Lives, 0, 0);
     this.DrawStringShadow(context, Mario.MarioCharacter.Score.toString().padStart(8, '0'), 0, 1);
     this.DrawStringShadow(context, "COIN", 14, 0);

@@ -1,39 +1,49 @@
-package at.jku.cg.binter.infinitemario;
+// package at.jku.cg.binter.infinitemario;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketSession;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.stereotype.Component;
+// import org.springframework.web.reactive.socket.WebSocketHandler;
+// import org.springframework.web.reactive.socket.WebSocketSession;
 
-import at.jku.cg.binter.infinitemario.log.MarioLog;
-import at.jku.cg.binter.infinitemario.log.event.MarioEvent;
-import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+// import at.jku.cg.binter.infinitemario.config.MarioConfiguration;
+// import at.jku.cg.binter.infinitemario.log.MarioLog;
+// import at.jku.cg.binter.infinitemario.log.event.MarioEvent;
+// import jakarta.annotation.PostConstruct;
+// import lombok.extern.slf4j.Slf4j;
+// import reactor.core.publisher.Mono;
 
-@Slf4j
-@Component
-public class MarioWebSocketHandler implements WebSocketHandler {
-    private final MarioLog marioLog;
+// @Slf4j
+// public class MarioWebSocketHandler implements WebSocketHandler {
+//     @Autowired
+//     MarioConfiguration config;
 
-    public MarioWebSocketHandler() {
-        marioLog = new MarioLog();
-    }
+//     private MarioLog marioLog;
 
-    @Override
-    public Mono<Void> handle(WebSocketSession session) {
-        log.debug("Starting Session - " + session.getId());
-        return session.receive()
-                .doOnNext(message -> {
-                    log(session.getId(), message.getPayloadAsText());
-                }).doOnComplete(() -> complete(session.getId())).then();
-    }
+//     @PostConstruct
+//     private void init() {
+//         marioLog = new MarioLog(config.getLogFolder());
+//     }
 
-    private MarioEvent log(String sessionId, String message) {
-        log.debug("Received :: {}", message);
-        return marioLog.addEvent(sessionId, message);
-    }
+//     @Override
+//     public Mono<Void> handle(WebSocketSession session) {
+//         log.debug("Starting Session - " + session.getId());
+//         return session.receive()
+//                 .doOnNext(message -> {
+//                     onMessage(session.getId(), message.getPayloadAsText());
+//                 })
+//                 .doOnComplete(() -> complete(session.getId()))
+//                 .then();
+//     }
 
-    private void complete(String sessionId) {
-        marioLog.closeSession(sessionId);
-        log.debug("Closing Session");
-    }
-}
+//     private MarioEvent onMessage(String sessionId, String message) {
+//         if (log.isDebugEnabled()) {
+//             log.debug("Received :: {}", message);
+//         }
+//         return marioLog.onMessage(sessionId, message);
+//     }
+
+//     private void complete(String sessionId) {
+//         marioLog.closeSession(sessionId);
+//         log.debug("Closing Session");
+//     }
+// }
