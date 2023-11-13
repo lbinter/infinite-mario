@@ -34,3 +34,7 @@ tasks.named('test') {
 bootJar {
 	launchScript()
 }
+
+bootBuildImage {
+	imageName = "lbinter/infinite-mario"
+}
