@@ -2,10 +2,12 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.0.5'
 	id 'io.spring.dependency-management' version '1.1.0'
+	id "com.palantir.docker" version "0.35.0"
+	id "com.palantir.docker-run" version "0.35.0"
 }
 
 group = 'at.jku.cg.binter'
-version = '0.0.1-beta'
+version = '0.0.2-beta'
 sourceCompatibility = '17'
 
 repositories {
@@ -37,4 +39,21 @@ bootJar {
 
 bootBuildImage {
 	imageName = "lbinter/infinite-mario"
+}
+
+docker {
+	dependsOn build
+	name "lbinter/infinite-mario:${project.version}"
+	tags "$project.version"
+	
+	dockerfile file("docker")
+
+	files bootJar.archivePath, processResources
+}
+
+dockerRun {
+	name "infinite-mario"
+    image "lbinter/infinite-mario:${project.version}"
+    ports '9090:9095'
+    daemonize true
 }

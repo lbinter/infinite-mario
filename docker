@@ -1,0 +1,4 @@
+FROM openjdk:17-jdk-alpine
+VOLUME /tmp
+COPY infinite-mario-*.jar /infinite-mario.jar
+ENTRYPOINT ["java", "-jar", "/infinite-mario.jar"]
