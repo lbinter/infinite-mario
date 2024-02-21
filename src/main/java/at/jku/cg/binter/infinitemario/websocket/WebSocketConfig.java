@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/logging")
-                // .setAllowedOrigins("localhost")
+                .setAllowedOrigins("https://imario.games.cg.jku.at/")
                 .withSockJS();
     }
 
