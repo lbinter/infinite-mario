@@ -1,0 +1,3 @@
+function  generateWorldImagePng(canvas, worldData){
+    
+}

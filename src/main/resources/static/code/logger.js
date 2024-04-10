@@ -6,7 +6,7 @@ var stompClient = null;
 var scoreEventSubscription = null;
 
 logger.startGame = function () {
-    $(document).ready(function () { new Enjine.Application().Initialize(new Mario.LoadingState(), 320, 240) });
+    $(document).ready(function () { EnjineApp = new Enjine.Application().Initialize(new Mario.LoadingState(), 320, 240) });
 }
 
 function connectLogging(playername) {

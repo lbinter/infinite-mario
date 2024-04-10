@@ -7,13 +7,11 @@ spring:
       - "classpath:/static/"
 
 mario:
-    logFolder: "\\home\\logs"
+    logFolder: logs/imario
     displayScore: true
 
 logging:
-  file:
-    name: mario.log
-    path: "\\home\\logs"
+  file.name: logs/mario.log
   level:
     root: ERROR
     org.springframework.web: ERROR

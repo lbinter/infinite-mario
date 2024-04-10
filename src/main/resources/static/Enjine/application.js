@@ -22,8 +22,16 @@ Enjine.Application.prototype = {
         this.canvas.EndDraw();
     },
 
-    Initialize: function (defaultState, resWidth, resHeight, appName, canvasName = "canvas",) {
-        this.canvas = new Enjine.GameCanvas();
+    Exit: function () {
+        this.canvas = null;
+        this.timer.Stop();
+        this.timer = null;
+        this.stateContext = null;
+        this.logger = null;
+    },
+
+    Initialize: function (defaultState, resWidth, resHeight, appName, canvasName = "canvas") {
+        this.canvas = new Enjine.GameCanvas(canvasName);
         this.timer = new Enjine.GameTimer();
         Enjine.KeyboardInput.Initialize();
         this.canvas.Initialize(canvasName, resWidth, resHeight);

@@ -4,6 +4,7 @@
 */
 var editorApp = null;
 var editorChooserApp = null;
+var EnjineApp = null;
 var Mario = {};
 var CurrentLevel = {};
 var logger = {};

@@ -146,6 +146,8 @@ Mario.LoadingState.prototype.CheckForChange = function (context) {
             context.ChangeState(new Mario.EditorState());
         } else if (this.mode == "editorChooser") {
             context.ChangeState(new Mario.EditorChooserState());
+        } else if (this.mode == "world") {
+            context.ChangeState(Mario.GlobalMapState);
         }
     }
 };
