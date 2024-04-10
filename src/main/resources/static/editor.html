@@ -110,8 +110,9 @@
                 </select>
                 <button id="level-generate" type="button" class="btn btn-primary me-4">Generate</button>
                 <button id="level-generate-empty" type="button" class="btn btn-primary me-4">Empty</button>
-                <button id="level-save" type="button" class="btn btn-primary me-2">Save</button>
-                <input id="level-load" class="form-control" type="file">
+                <button id="level-show" type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                    data-bs-target="#show_data">Show</button>
+                <input id="level-load" class="form-control me-2" type="file">
             </form>
             <form class="d-flex justify-content-end">
                 <div class="form-check form-switch me-2">
@@ -232,6 +233,38 @@
                         <div class="col-6">
 
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="show_data" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="LabelShowData" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="LabelShowData">Level Data</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="input-group">
+                                <textarea class="form-control" aria-label="File" id="level_data_raw"
+                                    rows="30"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="level-copy" class="btn btn-primary">Copy to Clipboard</button>
+                        <div class="d-flex pe-2">
+                            <div class="input-group">
+                                <span class="input-group-text">File Name</span>
+                                <input id="file_name" type="text" placeholder="mario-level" class="form-control"
+                                    value="mario-level">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="level-save" class="btn btn-primary">Download</button>
                     </div>
                 </div>
             </div>

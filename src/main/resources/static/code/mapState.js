@@ -676,6 +676,10 @@ Mario.MapState.prototype.CheckForChange = function (context) {
     }
 };
 
+Mario.MapState.prototype.IsLevel = function (x, y) {
+    return this.Level[x][y] == 2 && this.Data[x][y] != -11;
+}
+
 Mario.MapState.prototype.VisualizeLevel = function () {
     let s = "";
     // x => 320 / 16 = 20
@@ -741,4 +745,16 @@ Mario.MapState.prototype.VisualizeCastle = function () {
         }
     }
     return s;
+};
+
+Mario.MapState.prototype.StringifyMapState = function () {
+    let data = {
+        LevelDifficulty: this.LevelDifficulty,
+        LevelType: this.LevelType,
+        WorldNumber: this.WorldNumber,
+        Level: this.Level,
+        Data: this.Data,
+        CastleData: this.CastleData
+    };
+    return JSON.stringify(data);
 };

@@ -12,8 +12,20 @@ $(document).ready(function () {
         editorState.GenerateEmptyLevel();
         $("#level-paused").prop('checked', false);
     });
+    $("#level-copy").click(function () {
+        document.getElementById("level_data_raw").select();
+        document.execCommand('copy');
+    });
     $("#level-save").click(function () {
-        editorState.Save();
+        let fileName = document.getElementById("file_name").value;
+        if (fileName) {
+            editorState.Save(fileName);
+        } else {
+            editorState.Save();
+        }
+    });
+    $(window).on('show.bs.modal', function () {
+        document.getElementById("level_data_raw").value = editorState.GenerateJSON();
     });
     $("#level-load").on('change', function () {
         let file = $("#level-load").get(0).files[0];
@@ -74,20 +86,20 @@ $(document).ready(function () {
         editorChooserState.ClearSelectedGrid();
     });
 
-    
+
     $("#enemy-type").on('input', function () {
         editorChooserState.SetEnemyType(parseInt(this.value));
     });
     $("#enemy-winged").click(function () {
         editorChooserState.EnemyWingedModeToggle();
-     });
-     $("#enemy-add").click(function () {
-        if($("#enemy-type").val() == -1){
+    });
+    $("#enemy-add").click(function () {
+        if ($("#enemy-type").val() == -1) {
             $("#enemy-add").prop('checked', false);
             return;
         }
         editorChooserState.EnemyAddModeToggle();
-     });
+    });
 
     editorApp.canvas.Canvas.addEventListener('mousedown', function (e) {
         const rect = editorApp.canvas.Canvas.getBoundingClientRect();

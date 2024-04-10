@@ -537,7 +537,7 @@ Mario.EditorState.prototype.setExitY = function (y) {
     this.Level.ExitY = y;
 };
 
-Mario.EditorState.prototype.Save = function () {
+Mario.EditorState.prototype.GenerateJSON = function () {
     var level = {
         Width: this.Level.Width,
         Height: this.Level.Height,
@@ -566,15 +566,17 @@ Mario.EditorState.prototype.Save = function () {
             }
         }
     }
-    console.log("sprites added: " + sprites);
+    return JSON.stringify(level);
+}
 
+Mario.EditorState.prototype.Save = function (file_name = "mario-level") {
     file = new Blob([
-        JSON.stringify(level, null)
+        this.GenerateJSON()
     ], { type: "application/json" }, 1);
     var a = document.createElement("a"),
         url = URL.createObjectURL(file);
     a.href = url;
-    a.download = "mario-level";
+    a.download = file_name;
     document.body.appendChild(a);
     a.click();
     setTimeout(function () {
