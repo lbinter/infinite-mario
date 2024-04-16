@@ -402,23 +402,33 @@ function fillCastleTable(table, mapState) {
 }
 
 function generateIMarioJSON() {
-    var elements = document.getElementById("form-world-data").elements;
-    console.log("Form has: " + elements.length + " elements");
+    let output = {};
     for (i = 1; i <= worldId; i++) {
-        //console.log(document.getElementById("world_raw_" + i).value);
+        output[i] = {};
+        output[i].world = JSON.parse(document.getElementById("world_raw_" + i).value);
+        output[i].levels = {};
+
+        let level_block = "#level-block-" + i;
+        let level_data = document.querySelectorAll(level_block + " input, " +
+            level_block + " textarea");
+
+        for (j = 0; j <= level_data.length - 1; j += 2) {
+            let val = level_data[j + 1].value;
+            if (val) {
+                output[i].levels[level_data[j].value] = JSON.parse(val);
+            }
+        }
     }
-    let value = worldApp[1].stateContext.State.StringifyMapState();
-    // TODO build file
-    return value;
+    return JSON.stringify(output);
 }
 
 function downloadWorldDataFile() {
-    let fileName = document.getElementById("file_name").value;
-    if (!fileName) {
+    let file_name = document.getElementById("file_name").value;
+    if (!file_name) {
         file_name = "imario_world"
     }
     file = new Blob([
-        generateIMarioJSON()
+        document.getElementById("world_data_raw").value
     ], { type: "application/json" }, 1);
     var a = document.createElement("a"),
         url = URL.createObjectURL(file);
