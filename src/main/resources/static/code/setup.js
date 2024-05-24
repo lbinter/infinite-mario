@@ -8,9 +8,13 @@ var EnjineApp = null;
 var Mario = {};
 var CurrentLevel = {};
 var logger = {};
-var levelMap = new Map();
+var levelMap = {};
+var worldMap = {};
+var playerID = null;
 var editorState = null;
 var editorChooserState = null;
+
+var surveyUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScC-eGkE76wQ5g6S_ETQWUlzVjQK2vTzu0z_FLrRf58nHK1UQ/viewform?usp=pp_url&entry.2005620554=';
 
 // points
 var P_ENEMY_LOST_WINGS = 50;

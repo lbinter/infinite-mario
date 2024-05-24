@@ -143,10 +143,55 @@ Mario.MapState.prototype.NextWorld = function () {
     this.XFarthestCap = 0;
     this.YFarthestCap = 0;
 
+
+    let editorData = null;
+    let world = worldMap[this.WorldNumber + 1];
+    if (world) {
+        editorData = world.world;
+    }
+    if (editorData) {
+        console.log("Loading World Map '" + (this.WorldNumber + 1) + "' from json");
+        generated = this.LoadEditor(editorData);
+    }
+
     while (!generated) {
         generated = this.GenerateLevel();
     }
+
     this.RenderStatic();
+};
+
+Mario.MapState.prototype.LoadEditor = function (editorData) {
+    var width = 320 / 16 + 1;
+    var height = 240 / 16 + 1;
+
+
+    this.LevelDifficulty = editorData.LevelDifficulty;
+    this.LevelType = editorData.LevelType;
+    this.WorldNumber = editorData.WorldNumber;
+
+    this.Level = [];
+    this.Data = [];
+    this.CastleData = [];
+    let startX, startY = -1;
+    for (x = 0; x < width; x++) {
+        this.Level[x] = [];
+        this.Data[x] = [];
+        this.CastleData[x] = [];
+
+        for (y = 0; y < height; y++) {
+            this.Level[x][y] = editorData.Level[x][y];
+            this.Data[x][y] = editorData.Data[x][y];
+            this.CastleData[x][y] = editorData.CastleData[x][y];
+
+            if (this.Data[x][y] == -11) { // found start tile
+                this.XMario = x * 16;
+                this.YMario = y * 16;
+            }
+        }
+    }
+
+    return true;
 };
 
 Mario.MapState.prototype.GenerateLevel = function () {

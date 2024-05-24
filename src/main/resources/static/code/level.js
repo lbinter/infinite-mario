@@ -313,5 +313,34 @@ Mario.Level.prototype = {
                 }
             }
         }
+    },
+
+    Load: function (editorData) {
+        this.Width = editorData.Width;
+        this.Height = editorData.Height;
+        this.ExitX = editorData.ExitX;
+        this.ExitY = editorData.ExitY;
+
+        this.Map = [];
+        this.Data = [];
+        this.SpriteTemplates = [];
+        let x = 0, y = 0;
+        for (x = 0; x < this.Width; x++) {
+            this.Map[x] = [];
+            this.Data[x] = [];
+            this.SpriteTemplates[x] = [];
+            for (y = 0; y < this.Height; y++) {
+                this.Map[x][y] = editorData.Map[x][y];
+                this.Data[x][y] = editorData.Data[x][y];
+                this.SpriteTemplates[x][y] = null;
+
+            }
+        }
+
+        editorData.SpriteTemplates.forEach(st => {
+            this.SpriteTemplates[st.X][st.Y] = new Mario.SpriteTemplate(st.Type, st.Winged);
+        });
+
+        this.Save();
     }
 };

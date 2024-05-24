@@ -27,8 +27,9 @@ public class MarioController {
         if (player == null) {
             return;
         }
-        String id = player.getName() + sha.getSessionId();
-        
+
+        String id = player.getName();
+
         marioLog.addEvent(id, event);
 
         // simpMessagingTemplate.convertAndSendToUser(sha.getUser().getName(),

@@ -38,16 +38,28 @@ Mario.LevelState.prototype = new Enjine.GameState();
 Mario.LevelState.prototype.Enter = function () {
     logger.logKeys = true;
     var levelGenerator = new Mario.LevelGenerator(320, 15), i = 0, scrollSpeed = 0, w = 0, h = 0, bgLevelGenerator = null;
-    this.Level = levelMap.get(Mario.MarioCharacter.LevelString);
+    let worldID = Mario.MarioCharacter.LevelString.split('-')[0];
+    let curWorld = worldMap[worldID];
+    if (curWorld) {
+        let editorData = curWorld.levels[Mario.MarioCharacter.LevelString];
+        if (editorData) {
+            let newLevel = new Mario.Level(0, 0);
+            newLevel.Load(editorData);
+            this.Level = newLevel;
+        }
+    }
     if (this.Level == null) {
         console.log("Generating Level for \"" + Mario.MarioCharacter.LevelString + "\" with type [" + this.LevelType + "] and difficulty [" + this.LevelDifficulty + "]");
         this.Level = levelGenerator.CreateLevel(this.LevelType, this.LevelDifficulty);
         this.Level.Save();
+        curWorld.levels.set(Mario.MarioCharacter.LevelString, this.Level);
         levelMap.set(Mario.MarioCharacter.LevelString, this.Level);
         logger.level(Mario.MarioCharacter.LevelString, this.Level);
     } else {
         this.Level.Reset();
     }
+
+    console.log(this.Level);
 
     //play music here
     if (this.LevelType === Mario.LevelType.Overground) {

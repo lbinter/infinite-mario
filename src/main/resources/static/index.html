@@ -16,7 +16,7 @@
         }
 
         .container-canvas {
-            margin: 0 auto;
+            margin: 40px auto;
             width: 640px;
         }
     </style>
@@ -78,14 +78,9 @@
             <img src="images/logo.gif" width="640">
         </div>
     </div>
-    <div class="container mt-4 mb-4">
-        <div class="row justify-content-center">
-            <div class="col-sm-2">
-                <input id="playername" type="text" placeholder="Player name" class="form-control">
-            </div>
-            <div class="col-sm-1">
-                <button id="connectLogging" type="submit" class="btn btn-primary">Play</button>
-            </div>
+    <div id="playButtonContainer" class="container mt-4 mb-4" style="height: 240px;">
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <button id="connectLogging" type="submit" class="btn btn-primary">Play</button>
         </div>
     </div>
     <div class="container container-main">
@@ -98,7 +93,7 @@
     <div id="container-survey" class="container mt-4 mb-4" style="display: none;">
         <div class="row justify-content-center">
             <div class="col-md-3  offset-md-2">
-                <button id="survey" type="submit" class="btn btn-primary">Survey</button>
+                <a id="survey" href="#" class="btn btn-primary" role="button" target="_blank">Survey</a>
             </div>
         </div>
     </div>

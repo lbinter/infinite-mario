@@ -6,41 +6,49 @@ var stompClient = null;
 var scoreEventSubscription = null;
 
 logger.startGame = function () {
-    $(document).ready(function () { EnjineApp = new Enjine.Application().Initialize(new Mario.LoadingState(), 320, 240) });
+    $(document).ready(function () {
+        EnjineApp = new Enjine.Application().Initialize(new Mario.LoadingState(), 320, 240)
+    });
 }
 
-function connectLogging(playername) {
-    let socket = new SockJS('/logging');
-    stompClient = Stomp.over(socket);
-    stompClient.connect({ username: playername, }, function () {
-        console.log('Web Socket is connected to /logging');
-        stompClient.send('/mario/events', {}, JSON.stringify({ event: "SESSION_START" }));
-        scoreEventSubscription = stompClient.subscribe(
-            '/players/queue/messages',
-            function (message) {
-                console.log('received :: ' + message.body);
+function connectLogging() {
+    fetch("./imario_world.json")
+        .then((response) => response.json())
+        .then((json) => worldMap = json);
+    fetch("./player")
+        .then((response) => response.json())
+        .then((json) => {
+            playerID = json.player;
+            let socket = new SockJS('/logging');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({ username: playerID, }, function () {
+                console.log('Web Socket is connected to /logging with playerID: ' + playerID);
+                stompClient.send('/mario/events', {}, JSON.stringify({ event: "SESSION_START" }));
+                scoreEventSubscription = stompClient.subscribe(
+                    '/players/queue/messages',
+                    function (message) {
+                        console.log('received :: ' + message.body);
+                    });
+                logger.isConnected = true;
+                $("#container-logo").hide();
+                $("#connectLogging").prop('disabled', true);
+                $("#playButtonContainer").hide();
+                logger.startGame();
+                $("#container-survey").show();
+                $("#survey").prop('href', getSurveyUrl()) ;
             });
-        logger.isConnected = true;
-        $("#container-logo").hide();
-        $("#playername").attr('readonly', true);
-        $("#connectLogging").prop('disabled', true);
-        logger.startGame();
-        $("#container-survey").show();
-    });
-    stompClient.debug = function () { };//do nothing
-    socket.onclose = function () {
-        disconnectLogging();
-    };
+            stompClient.debug = function () { };//do nothing
+            socket.onclose = function () {
+                disconnectLogging();
+            };
+        });
 }
 
 $(function () {
     $("#connectLogging").click(function () {
-        if (!logger.isConnected && $("#playername").val()) {
-            connectLogging($("#playername").val());
+        if (!logger.isConnected) {
+            connectLogging();
         }
-    });
-    $("#disconnectLogging").click(function () {
-        disconnectLogging();
     });
 });
 
@@ -351,4 +359,8 @@ logger.runningStop = function () {
 
 window.onbeforeunload = function () {
     disconnectLogging();
+}
+
+function getSurveyUrl() {
+    return surveyUrl + playerID;
 }
