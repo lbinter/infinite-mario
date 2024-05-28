@@ -31,11 +31,13 @@ function connectLogging() {
                     });
                 logger.isConnected = true;
                 $("#container-logo").hide();
-                $("#connectLogging").prop('disabled', true);
+                $("#consent-show").prop('disabled', true);
                 $("#playButtonContainer").hide();
                 logger.startGame();
+                $("#container-help").show();
+                $("#container-main").show();
                 $("#container-survey").show();
-                $("#survey").prop('href', getSurveyUrl()) ;
+                $("#survey").prop('href', getSurveyUrl());
             });
             stompClient.debug = function () { };//do nothing
             socket.onclose = function () {
@@ -45,7 +47,7 @@ function connectLogging() {
 }
 
 $(function () {
-    $("#connectLogging").click(function () {
+    $("#startGame").click(function () {
         if (!logger.isConnected) {
             connectLogging();
         }
@@ -267,10 +269,16 @@ logger.enemyDied = function (type, x, y, deathtype) {
 
 logger.lastX = 0;
 logger.lastY = 0;
+logger.lastPosTime = 0;
 logger.logPostion = true;
-logger.position = function (x, y) {
+logger.position = function (x, y, facing) {
+    let time = timeElapsed();
+    if (time == logger.lastPosTime) {
+        return;
+    }
+    logger.lastPosTime = time;
     if (!logger.logPostion) return;
-    let str = "Pos[Time:" + timeElapsed() + ",";
+    let str = "Pos[Time:" + time + ",";
     let posChanged = false;
     if (logger.lastX != x) {
         logger.lastX = x;
@@ -290,7 +298,8 @@ logger.position = function (x, y) {
             event: "POS",
             posX: x,
             posY: y,
-            time: timeElapsed()
+            facing: facing,
+            time: time
         };
         this.log(message);
     }
@@ -310,11 +319,7 @@ logger.level = function (level_string, level) {
         level_string: level_string,
         level_data: level
     };
-    this.log(message, function replacer(key, value) {
-        if (key !== "levelMap"
-            && key !== "levelData"
-            && key !== "levelSpriteTemplates") { return value; }
-    });
+    this.log(message);
 }
 
 logger.jumpStart = function (stomp = false) {
@@ -325,6 +330,7 @@ logger.jumpStart = function (stomp = false) {
     }
     let message = {
         event: "JUMP_START",
+        stomp: stomp,
         time: timeElapsed()
     };
     this.log(message);
@@ -357,6 +363,18 @@ logger.runningStop = function () {
     this.log(message);
 }
 
+logger.fireball = function (x, y, facing) {
+    console.log("fireball shot");
+    let message = {
+        event: "FIREBALL",
+        posX: x,
+        posY: y,
+        facing: facing,
+        time: timeElapsed()
+    };
+    this.log(message);
+}
+
 window.onbeforeunload = function () {
     disconnectLogging();
 }
@@ -364,3 +382,6 @@ window.onbeforeunload = function () {
 function getSurveyUrl() {
     return surveyUrl + playerID;
 }
+
+
+$("#container-main").hide();

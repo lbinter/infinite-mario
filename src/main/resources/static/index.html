@@ -80,20 +80,106 @@
     </div>
     <div id="playButtonContainer" class="container mt-4 mb-4" style="height: 240px;">
         <div class="d-flex align-items-center justify-content-center h-100">
-            <button id="connectLogging" type="submit" class="btn btn-primary">Play</button>
+            <button id="consent-show" type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                data-bs-target="#show_consent">Play</button>
         </div>
     </div>
-    <div class="container container-main">
+
+    <div id="container-main" class="container container-main">
         <div class="container-canvas">
             <canvas id="canvas" width="640" height="480">
                 <p>Your browser does not support the canvas element.</p>
             </canvas>
         </div>
     </div>
+
+    <div id="container-help" class="container" style="width: 640px;display: none;">
+        <div class="card card-body">
+            <div class="row justify-content-center">
+                <div class="col text-end">To move character please use:</div>
+                <div class="col">
+                    <table>
+                        <tr>
+                            <td colspan="3" class="text-center">&#x2B06;</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">&#x2B05;</td>
+                            <td class="text-center">&#x2B07;</td>
+                            <td class="text-center">&#x27A1;</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col text-end">To jump please press:</div>
+                <div class="col"><b>S</b></div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col text-end">To use flower attack please press:</div>
+                <div class="col"><b>A</b></div>
+            </div><br>
+            <div class="col text-center">
+                To play again after <b>Game over!</b> press <b>S</b>
+            </div>
+        </div>
+    </div>
+
     <div id="container-survey" class="container mt-4 mb-4" style="display: none;">
         <div class="row justify-content-center">
             <div class="col-md-3  offset-md-2">
                 <a id="survey" href="#" class="btn btn-primary" role="button" target="_blank">Survey</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="show_consent" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="LabelShowConsent" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="LabelShowConsent">Consent</h1>
+                </div>
+                <div class="modal-body">
+                    <h2>Goal of the research<img src="images/JKU-Hauptlogo-en-schwarz-hoch.svg"
+                            class="rounded float-end" alt="JKU" width="233px"></h2>
+                    <p class="text-justify">
+                        I am a student in computer science at the Johannes Kepler University Linz, Austria. I am
+                        conducting this research project as part of my bachelor thesis.
+                    </p>
+                    <p class="text-justify">
+                        The goal of my bachelor thesis is creating a research environment for player behaviour studies
+                        based on Super Mario Bros. To achieve this goal all player actions are logged and saved to a
+                        file and linked to the survey via an generated player id.
+                    </p>
+                    <p class="text-justify">
+                        Your participation in this study will contribute to the further development of this project and
+                        to the advancement of knowledge on creating player behaviour studies and is greatly
+                        appreciated.</p>
+                    <p class="text-justify">
+                        You can contact me at <a href="mailto:k00755659@students.jku.at">k00755659@students.jku.at</a>
+                        if you have any questions.
+                    </p>
+                    <h2>Informed Consent Form: Please read carefully.</h2>
+                    <p class="text-justify">
+                        In this study, we are collecting your playtime, character movement and actions data.<br>
+                        We are also asking you to fill a demographic questionnaire about you and your gaming experience.
+                        By clicking on ‘agree’, you agree to the following statements, and thus provide your consent to
+                        participate in the study:
+                    </p>
+                    <ul>
+                        <li>I have understood the information provided above and had the opportunity to ask questions
+                            via the contact options above, which have been answered to my satisfaction.</li>
+                        <li>I understand that any data gathered in this study will be stored anonymously and securely
+                            according to JKU policy, and will be used by researchers associated with this project.</li>
+                        <li>I understand that I will not benefit financially from this study or
+                            from any possible outcome that may result in the future.</li>
+                        <li>We foresee no risks associated with participating in this study.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Decline</button>
+                    <button type="button" id="startGame" data-bs-dismiss="modal" class="btn btn-primary">Accept</button>
+                </div>
             </div>
         </div>
     </div>

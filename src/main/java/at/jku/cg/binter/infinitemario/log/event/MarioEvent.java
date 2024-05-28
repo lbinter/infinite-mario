@@ -26,6 +26,11 @@ public class MarioEvent {
     @JsonProperty("posY")
     public Float posY;
 
+    @JsonProperty("key")
+    public Integer key;
+    @JsonProperty("facing")
+    public Integer facing;
+
     @JsonProperty("level")
     public String level;
     @JsonProperty("lives")
@@ -34,6 +39,9 @@ public class MarioEvent {
     public Integer coins;
     @JsonProperty("points")
     public Integer points;
+
+    @JsonProperty("stomp")
+    public Boolean stomp;
 
     @JsonProperty("level_string")
     public String level_string;

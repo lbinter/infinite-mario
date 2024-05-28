@@ -135,7 +135,7 @@ Mario.Character.prototype.Blink = function (on) {
 
 
 Mario.Character.prototype.runningStart = function (xa) {
-    if(xa > -0.61 && xa < 1.135){
+    if (xa > -0.61 && xa < 1.135) {
         // ignore blocking run
         return;
     }
@@ -172,7 +172,7 @@ Mario.Character.prototype.Move = function () {
         }
         this.X += this.Xa;
         this.Y += this.Ya;
-        logger.position(this.X, this.Y);
+        logger.position(this.X, this.Y, this.Facing);
         return;
     }
 
@@ -287,6 +287,7 @@ Mario.Character.prototype.Move = function () {
     if (Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.A) && this.CanShoot && this.Fire && this.World.FireballsOnScreen < 2) {
         Enjine.Resources.PlaySound("fireball");
         this.World.AddSprite(new Mario.Fireball(this.World, this.X + this.Facing * 6, this.Y - 20, this.Facing));
+        logger.fireball(this.X, this.Y, this.Facing);
     }
 
     this.CanShoot = !Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.A);
@@ -529,12 +530,12 @@ Mario.Character.prototype.SubMove = function (xa, ya) {
             this.OnGround = true;
         }
 
-        logger.position(this.X, this.Y);
+        logger.position(this.X, this.Y, this.Facing);
         return false;
     } else {
         this.X += xa;
         this.Y += ya;
-        logger.position(this.X, this.Y);
+        logger.position(this.X, this.Y, this.Facing);
         return true;
     }
 };
@@ -579,7 +580,6 @@ Mario.Character.prototype.Stomp = function (object) {
     this.SubMove(0, targetY - this.Y);
 
     if (object instanceof Mario.Enemy || object instanceof Mario.BulletBill) {
-
         Enjine.Resources.PlaySound("kick");
         this.XJumpSpeed = 0;
         this.YJumpSpeed = -1.9;

@@ -176,10 +176,6 @@ Mario.Level = function (width, height) {
     this.Data = [];
     this.SpriteTemplates = [];
 
-    this.levelMap = [];
-    this.levelData = [];
-    this.levelSpriteTemplates = [];
-
     var x = 0, y = 0;
     for (x = 0; x < this.Width; x++) {
         this.Map[x] = [];
@@ -267,80 +263,72 @@ Mario.Level.prototype = {
         this.SpriteTemplates[x][y] = template;
     },
 
+    /**
+     * 
+     * @returns copy of the level
+     */
     Save: function () {
-        this.levelMap = [];
-        this.levelData = [];
-        this.levelSpriteTemplates = [];
+        let level = new Mario.Level(this.Width, this.Height);
+
+        level.ExitX = this.ExitX;
+        level.ExitY = this.ExitY;
+
+        level.Map = [];
+        level.Data = [];
+        level.SpriteTemplates = [];
 
         var x = 0, y = 0;
         for (x = 0; x < this.Width; x++) {
-            this.levelMap[x] = [];
-            this.levelData[x] = [];
-            this.levelSpriteTemplates[x] = [];
+            level.Map[x] = [];
+            level.Data[x] = [];
+            level.SpriteTemplates[x] = [];
             for (y = 0; y < this.Height; y++) {
-                this.levelMap[x][y] = this.Map[x][y];
-                this.levelData[x][y] = this.Data[x][y];
+                level.Map[x][y] = this.Map[x][y];
+                level.Data[x][y] = this.Data[x][y];
 
                 let st = this.SpriteTemplates[x][y];
                 if (st != null) {
-                    this.levelSpriteTemplates[x][y] = st.Copy();
+                    level.SpriteTemplates[x][y] = st.Copy();
                 } else {
-                    this.levelSpriteTemplates[x][y] = null;
+                    level.SpriteTemplates[x][y] = null;
                 }
             }
         }
+        return level;
     },
 
-    Reset: function () {
-        this.Map = [];
-        this.Data = [];
-        this.SpriteTemplates = [];
-
-        var x = 0, y = 0;
-        for (x = 0; x < this.Width; x++) {
-            this.Map[x] = [];
-            this.Data[x] = [];
-            this.SpriteTemplates[x] = [];
-            for (y = 0; y < this.Height; y++) {
-                this.Map[x][y] = this.levelMap[x][y];
-                this.Data[x][y] = this.levelData[x][y];
-
-                let st = this.levelSpriteTemplates[x][y];
-                if (st != null) {
-                    this.SpriteTemplates[x][y] = st.Copy();
-                } else {
-                    this.SpriteTemplates[x][y] = null;
-                }
-            }
-        }
-    },
-
-    Load: function (editorData) {
-        this.Width = editorData.Width;
-        this.Height = editorData.Height;
-        this.ExitX = editorData.ExitX;
-        this.ExitY = editorData.ExitY;
+    Load: function (level) {
+        this.Width = level.Width;
+        this.Height = level.Height;
+        this.ExitX = level.ExitX;
+        this.ExitY = level.ExitY;
 
         this.Map = [];
         this.Data = [];
         this.SpriteTemplates = [];
         let x = 0, y = 0;
+        let loadSpritesFrom2DArray = level.SpriteTemplates.length == this.Width;
         for (x = 0; x < this.Width; x++) {
             this.Map[x] = [];
             this.Data[x] = [];
             this.SpriteTemplates[x] = [];
             for (y = 0; y < this.Height; y++) {
-                this.Map[x][y] = editorData.Map[x][y];
-                this.Data[x][y] = editorData.Data[x][y];
+                this.Map[x][y] = level.Map[x][y];
+                this.Data[x][y] = level.Data[x][y];
                 this.SpriteTemplates[x][y] = null;
 
+                if (loadSpritesFrom2DArray) {
+                    let st = level.SpriteTemplates[x][y];
+                    if (st) {
+                        this.SpriteTemplates[x][y] = st.Copy();
+                    }
+                }
             }
         }
-
-        editorData.SpriteTemplates.forEach(st => {
-            this.SpriteTemplates[st.X][st.Y] = new Mario.SpriteTemplate(st.Type, st.Winged);
-        });
-
-        this.Save();
+        if (!loadSpritesFrom2DArray) {
+            level.SpriteTemplates.forEach(st => {
+                this.SpriteTemplates[st.X][st.Y] = new Mario.SpriteTemplate(st.Type, st.Winged);
+            });
+        }
     }
 };

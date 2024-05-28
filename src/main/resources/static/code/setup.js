@@ -8,7 +8,6 @@ var EnjineApp = null;
 var Mario = {};
 var CurrentLevel = {};
 var logger = {};
-var levelMap = {};
 var worldMap = {};
 var playerID = null;
 var editorState = null;
@@ -23,3 +22,10 @@ var P_RED_KOOPA_DEAD = 300;
 var P_GOOMBA_DEAD = 100;
 var P_SPIKY_DEAD = 200;
 var P_FLOWER_DEAD = 200;
+
+function addWorld(worldID) {
+	worldMap[worldID] = {};
+	worldMap[worldID].world = {};
+	worldMap[worldID].levels = {};
+	return worldMap[worldID];
+}

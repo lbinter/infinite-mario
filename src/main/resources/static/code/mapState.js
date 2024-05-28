@@ -144,45 +144,54 @@ Mario.MapState.prototype.NextWorld = function () {
     this.YFarthestCap = 0;
 
 
-    let editorData = null;
-    let world = worldMap[this.WorldNumber + 1];
-    if (world) {
-        editorData = world.world;
+    let data = null;
+    let loadedFromWorldMap = false;
+    let curWorld = worldMap[this.WorldNumber + 1];
+
+    if (curWorld) {
+        data = curWorld.world;
+    } else {
+        curWorld = addWorld(this.WorldNumber + 1);
     }
-    if (editorData) {
+
+    if (data) {
         console.log("Loading World Map '" + (this.WorldNumber + 1) + "' from json");
-        generated = this.LoadEditor(editorData);
+        generated = this.Load(data);
+        loadedFromWorldMap = true;
     }
 
     while (!generated) {
         generated = this.GenerateLevel();
     }
 
+    if (!loadedFromWorldMap) {
+        curWorld.world = this;
+    }
+
     this.RenderStatic();
 };
 
-Mario.MapState.prototype.LoadEditor = function (editorData) {
+Mario.MapState.prototype.Load = function (data) {
     var width = 320 / 16 + 1;
     var height = 240 / 16 + 1;
 
 
-    this.LevelDifficulty = editorData.LevelDifficulty;
-    this.LevelType = editorData.LevelType;
-    this.WorldNumber = editorData.WorldNumber;
+    this.LevelDifficulty = data.LevelDifficulty;
+    this.LevelType = data.LevelType;
+    this.WorldNumber = data.WorldNumber;
 
     this.Level = [];
     this.Data = [];
     this.CastleData = [];
-    let startX, startY = -1;
     for (x = 0; x < width; x++) {
         this.Level[x] = [];
         this.Data[x] = [];
         this.CastleData[x] = [];
 
         for (y = 0; y < height; y++) {
-            this.Level[x][y] = editorData.Level[x][y];
-            this.Data[x][y] = editorData.Data[x][y];
-            this.CastleData[x][y] = editorData.CastleData[x][y];
+            this.Level[x][y] = data.Level[x][y];
+            this.Data[x][y] = data.Data[x][y];
+            this.CastleData[x][y] = data.CastleData[x][y];
 
             if (this.Data[x][y] == -11) { // found start tile
                 this.XMario = x * 16;
