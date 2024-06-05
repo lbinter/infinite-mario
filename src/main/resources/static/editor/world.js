@@ -120,6 +120,7 @@ function generateWorld(world_id) {
         fillData(mapState, world_id);
         addLevels(world_id);
     });
+    
 }
 
 function addLevels(world_id) {
@@ -218,10 +219,7 @@ function generateLevelList(mapState, world_id) {
 }
 
 function clearTable(table) {
-    let rows = table.rows.length;
-    for (i = rows; i < 0; i--) {
-        table.deleteRow(i);
-    }
+    table.innerHTML = "";
 }
 
 function fillOverviewTable(table, mapState) {

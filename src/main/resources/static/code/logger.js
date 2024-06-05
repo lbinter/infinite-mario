@@ -89,6 +89,7 @@ logger.log = function (message, replacer = null, stringify = true) {
 }
 
 logger.start = function () {
+    logger.alive = true;
     let message = {
         event: "START",
         level: Mario.MarioCharacter.LevelString,
@@ -110,7 +111,6 @@ logger.finished = function () {
 
 
 logger.gameOver = function () {
-    // console.log("Game Over.");
     let message = {
         event: "GAME_OVER"
     };
@@ -119,26 +119,53 @@ logger.gameOver = function () {
 
 
 logger.winState = function () {
-    //console.log("Won with " + Mario.MarioCharacter.Lives + " left.");
     let message = {
         event: "WIN"
     };
     this.log(message);
 }
 
-logger.died = function () {
-    // console.log("Mario died at time " + timeElapsed());
+/**
+ * @param {Number} type -1 = time out, 0 = fell to death, 1 = death by enemy
+ */
+logger.alive = true;
+logger.die = function (type) {
+    if (!logger.alive) {
+        return;
+    }
+    logger.disablePositionLog();
+    logger.alive = false;
     let message = {
         event: "DEATH",
+        deathType: type,
         time: timeElapsed()
     };
     this.log(message);
 }
 
-logger.powerupSpawned = function (pType) {
-    // console.log("PowerUp " + pType + " spawned at time " + timeElapsed());
+/**
+ * 
+ * @param {Number} x MarioCharacter position X
+ * @param {Number} y MarioCharacter position Y
+ * @param {Number} hurt 1 = hurt by enemy, 2 = hurt by shell, 3 = hurt by bullet bill
+ */
+logger.getHurt = function (x, y, hurt, enemyId) {
     let message = {
-        event: "POWERUP_SPAWNED",
+        event: "GET_HURT",
+        posX: x,
+        posY: y,
+        hurt: hurt,
+        enemyId: enemyId,
+        time: timeElapsed()
+    };
+    this.log(message);
+}
+
+logger.powerupSpawned = function (pType, x, y) {
+    let message = {
+        event: "POWERUP_SPAWN",
+        posX: x,
+        posY: y,
         pType: pType,
         time: timeElapsed()
     };
@@ -146,7 +173,6 @@ logger.powerupSpawned = function (pType) {
 }
 
 logger.gainedMushroom = function () {
-    //console.log("Gained PowerUp Mushroom at time " + timeElapsed());
     let message = {
         event: "POWERUP",
         pType: "mushroom",
@@ -156,7 +182,6 @@ logger.gainedMushroom = function () {
 }
 
 logger.gainedFlower = function () {
-    //console.log("Gained PowerUp Flower at time " + timeElapsed());
     let message = {
         event: "POWERUP",
         pType: "flower",
@@ -166,7 +191,6 @@ logger.gainedFlower = function () {
 }
 
 logger.lostPowerUp = function () {
-    // console.log("Lost PowerUp at time " + timeElapsed());
     let message = {
         event: "POWERUP_LOST",
         time: timeElapsed()
@@ -175,7 +199,6 @@ logger.lostPowerUp = function () {
 }
 
 logger.gainedCoin = function () {
-    //console.log("Gained coin " + Mario.MarioCharacter.Coins + " at time " + timeElapsed());
     let message = {
         event: "COIN",
         coins: Mario.MarioCharacter.Coins,
@@ -185,7 +208,6 @@ logger.gainedCoin = function () {
 }
 
 logger.gainedLive = function () {
-    // console.log("Gained live - new total " + Mario.MarioCharacter.Lives + " at time " + timeElapsed() + ". Coins set to 0.");
     let message = {
         event: "LIVE",
         lives: Mario.MarioCharacter.Lives,
@@ -220,7 +242,6 @@ logger.keyup = function (key) {
 }
 
 logger.destroyBlock = function (x, y) {
-    console.log("destroyed block[" + x + "," + y + "]");
     let message = {
         event: "BLOCK_DESTROYED",
         posX: x,
@@ -230,35 +251,23 @@ logger.destroyBlock = function (x, y) {
     this.log(message);
 }
 
-logger.enemyDied = function (type, x, y, deathtype) {
-    let str = "";
-    if (type == 0) { // RedKoopa
-        str += "Red Koopa";
-    } else if (type == 1) { // GreenKoopa
-        str += "Green Koopa";
-    } else if (type == 2) { // Goomba
-        str += "Goomba";
-    } else if (type == 3) { // Spiky
-        str += "Spiky";
-    } else if (type == 4) { // Flower
-        str += "Flower";
-    }
-    if (deathtype == -1) {
-        str += " lost wings at pos[" + x + "," + y + "].";
-    } else {
-        str += " died at pos[" + x + "," + y + "]";
-        if (deathtype == 0) { // stomp
-            str += " by stomp.";
-        } else if (deathtype == 1) { // shell
-            str += " by shell.";
-        } else if (deathtype == 2) { // fireball
-            str += " by fireball.";
-        }
-    }
-    //console.log(str);
+logger.enemySpawn = function (type, x, y, id = -1) {
+    let message = {
+        event: "ENEMY_SPAWN",
+        enemyType: type,
+        enemyId: id,
+        posX: x,
+        posY: y,
+        time: timeElapsed()
+    };
+    this.log(message);
+}
+
+logger.enemyDied = function (type, x, y, deathtype, id) {
     let message = {
         event: "ENEMY_DEATH",
         enemyType: type,
+        enemyId: id,
         posX: x,
         posY: y,
         deathType: deathtype,
@@ -278,22 +287,16 @@ logger.position = function (x, y, facing) {
     }
     logger.lastPosTime = time;
     if (!logger.logPostion) return;
-    let str = "Pos[Time:" + time + ",";
     let posChanged = false;
     if (logger.lastX != x) {
         logger.lastX = x;
-        str += "X:" + x;
         posChanged = true;
     }
     if (logger.lastY != y) {
         logger.lastY = y;
-        if (posChanged) str += ",";
-        str += "Y:" + y;
         posChanged = true;
     }
-    str += "]";
     if (posChanged) {
-        // console.log(str);
         let message = {
             event: "POS",
             posX: x,
@@ -313,21 +316,31 @@ logger.disablePositionLog = function () {
     logger.logPostion = false;
 }
 
-logger.level = function (level_string, level) {
+logger.level = function (id, data) {
     let message = {
         event: "LEVEL",
-        level_string: level_string,
-        level_data: level
+        levelId: id,
+        levelData: data
+    };
+    this.log(message);
+}
+
+logger.world = function (data) {
+    let message = {
+        event: "WORLD",
+        worldData: {
+            LevelDifficulty: data.LevelDifficulty,
+            LevelType: data.LevelType,
+            Level: data.Level,
+            Data: data.Data,
+            WorldNumber: data.WorldNumber,
+            CastleData: data.CastleData
+        }
     };
     this.log(message);
 }
 
 logger.jumpStart = function (stomp = false) {
-    if (stomp) {
-        console.log("jump stomp start");
-    } else {
-        console.log("jump start");
-    }
     let message = {
         event: "JUMP_START",
         stomp: stomp,
@@ -337,7 +350,6 @@ logger.jumpStart = function (stomp = false) {
 }
 
 logger.jumpLand = function () {
-    console.log("jump land");
     let message = {
         event: "JUMP_LAND",
         time: timeElapsed()
@@ -346,7 +358,6 @@ logger.jumpLand = function () {
 }
 
 logger.runningStart = function () {
-    console.log("run start");
     let message = {
         event: "RUN_START",
         time: timeElapsed()
@@ -355,7 +366,6 @@ logger.runningStart = function () {
 }
 
 logger.runningStop = function () {
-    console.log("run stop");
     let message = {
         event: "RUN_STOP",
         time: timeElapsed()
@@ -364,7 +374,6 @@ logger.runningStop = function () {
 }
 
 logger.fireball = function (x, y, facing) {
-    console.log("fireball shot");
     let message = {
         event: "FIREBALL",
         posX: x,

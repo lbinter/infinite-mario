@@ -314,6 +314,7 @@ Mario.Character.prototype.Move = function () {
     this.SubMove(0, this.Ya);
     if (this.Y > this.World.Level.Height * 16 + 16) {
         this.Die();
+        logger.die(0);
     }
 
     if (this.X < 0) {
@@ -628,6 +629,7 @@ Mario.Character.prototype.GetHurt = function () {
         this.InvulnerableTime = 32;
     } else {
         this.Die();
+        logger.die(1);
     }
 };
 
@@ -641,8 +643,6 @@ Mario.Character.prototype.Win = function () {
 };
 
 Mario.Character.prototype.Die = function () {
-    logger.died();
-    logger.disablePositionLog();
     this.XDeathPos = this.X | 0;
     this.YDeathPos = this.Y | 0;
     this.World.Paused = true;

@@ -33,6 +33,8 @@ Mario.Enemy = function (world, x, y, dir, type, winged) {
     this.AvoidCliffs = this.Type === Mario.Enemy.RedKoopa;
     this.NoFireballDeath = this.Type === Mario.Enemy.Spiky;
 
+    this.Id = -1;
+
     this.YPic = this.Type;
     if (this.YPic > 1) {
         this.Height = 12;
@@ -61,7 +63,7 @@ Mario.Enemy.prototype.CollideCheck = function () {
                 if (this.Winged) {
                     this.Winged = false;
                     this.Ya = 0;
-                    logger.enemyDied(this.Type, this.X, this.Y, -1);
+                    logger.enemyDied(this.Type, this.X, this.Y, -1, this.Id);
                     Mario.MarioCharacter.GetPoints(P_ENEMY_LOST_WINGS);
                 } else {
                     this.YPicO = 31 - (32 - 8);
@@ -73,7 +75,7 @@ Mario.Enemy.prototype.CollideCheck = function () {
 
                     this.DeadTime = 10;
                     this.Winged = false;
-                    logger.enemyDied(this.Type, this.X, this.Y, 0);
+                    logger.enemyDied(this.Type, this.X, this.Y, 0, this.Id);
                     if (this.Type === Mario.Enemy.RedKoopa) {
                         this.World.AddSprite(new Mario.Shell(this.World, this.X, this.Y, 0));
                     } else if (this.Type === Mario.Enemy.GreenKoopa) {
@@ -83,6 +85,7 @@ Mario.Enemy.prototype.CollideCheck = function () {
                 }
             } else {
                 Mario.MarioCharacter.GetHurt();
+                logger.getHurt(Mario.MarioCharacter.X, Mario.MarioCharacter.Y, 1, this.Id);
             }
         }
     }
@@ -300,7 +303,7 @@ Mario.Enemy.prototype.ShellCollideCheck = function (shell) {
             this.DeadTime = 100;
             this.Winged = false;
             this.YFlip = true;
-            logger.enemyDied(this.Type, this.X, this.Y, 1);
+            logger.enemyDied(this.Type, this.X, this.Y, 1, this.Id);
             this.AwardPoints();
             return true;
         }
@@ -331,7 +334,7 @@ Mario.Enemy.prototype.FireballCollideCheck = function (fireball) {
             this.DeadTime = 100;
             this.Winged = false;
             this.YFlip = true;
-            logger.enemyDied(this.Type, this.X, this.Y, 2);
+            logger.enemyDied(this.Type, this.X, this.Y, 2, this.Id);
             this.AwardPoints();
             return true;
         }
@@ -409,8 +412,10 @@ Mario.Enemy.GreenKoopa = 1;
 Mario.Enemy.Goomba = 2;
 Mario.Enemy.Spiky = 3;
 Mario.Enemy.Flower = 4;
+Mario.Enemy.BulletBill = 5;
+Mario.Enemy.Bullet = 6;
 
-Mario.Enemy.prototype.AwardPoints = function(){
+Mario.Enemy.prototype.AwardPoints = function () {
     if (this.Type === Mario.Enemy.RedKoopa) {
         Mario.MarioCharacter.GetPoints(P_RED_KOOPA_DEAD);
     } else if (this.Type === Mario.Enemy.GreenKoopa) {

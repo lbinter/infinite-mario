@@ -12,7 +12,7 @@ Mario.SpriteTemplate = function (type, winged) {
 };
 
 Mario.SpriteTemplate.prototype = {
-    Spawn: function (world, x, y, dir) {
+    Spawn: function (world, x, y, dir, id) {
         if (this.IsDead) {
             return;
         }
@@ -23,6 +23,8 @@ Mario.SpriteTemplate.prototype = {
             this.Sprite = new Mario.Enemy(world, x * 16 + 8, y * 16 + 15, dir, this.Type, this.Winged);
         }
         this.Sprite.SpriteTemplate = this;
+        this.Sprite.Id = id;
+        logger.enemySpawn(this.Type, this.Sprite.X, this.Sprite.Y, this.Sprite.Id);
         world.AddSprite(this.Sprite);
     },
     Copy: function () {

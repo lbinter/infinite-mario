@@ -20,6 +20,11 @@ public class MarioEvent {
     public EnemyType enemyType;
     @JsonProperty("deathType")
     public DeathType deathType;
+    @JsonProperty("enemyId")
+    public Integer enemyId;
+
+    @JsonProperty("hurt")
+    public Integer hurt;
 
     @JsonProperty("posX")
     public Float posX;
@@ -43,8 +48,10 @@ public class MarioEvent {
     @JsonProperty("stomp")
     public Boolean stomp;
 
-    @JsonProperty("level_string")
-    public String level_string;
-    @JsonProperty("level_data")
-    public MarioLevel level_data;
+    @JsonProperty("levelId")
+    public String levelId;
+    @JsonProperty("levelData")
+    public MarioLevel levelData;
+    @JsonProperty("worldData")
+    public MarioWorld worldData;
 }

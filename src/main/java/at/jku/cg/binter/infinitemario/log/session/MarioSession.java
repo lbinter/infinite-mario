@@ -24,6 +24,7 @@ public class MarioSession {
     private final List<MarioEvent> events = new ArrayList<>();
 
     private final List<MarioEvent> levelDataEvents = new ArrayList<>();
+    private final List<MarioEvent> worldDataEvents = new ArrayList<>();
 
     public MarioSession(MarioConfiguration config, String sessionId, ObjectMapper mapper) {
         this.config = config;
@@ -39,6 +40,10 @@ public class MarioSession {
             if (!containsLevel(event)) {
                 levelDataEvents.add(event);
             }
+        } else if (event.eventType == EventType.WORLD) {
+            if (!containsWorld(event)) {
+                worldDataEvents.add(event);
+            }
         } else if (event.eventType == EventType.SESSION_CLOSE) {
             events.add(event);
             writeToFile();
@@ -50,7 +55,18 @@ public class MarioSession {
 
     private boolean containsLevel(MarioEvent newEvent) {
         for (MarioEvent event : levelDataEvents) {
-            if (newEvent.level_string.equals(event.level_string)) {
+            if (newEvent.levelId.equals(event.levelId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsWorld(MarioEvent newEvent) {
+        for (MarioEvent event : worldDataEvents) {
+            if (newEvent.worldData.LevelDifficulty == event.worldData.LevelDifficulty &&
+                    newEvent.worldData.LevelType == event.worldData.LevelType &&
+                    newEvent.worldData.WorldNumber == event.worldData.WorldNumber) {
                 return true;
             }
         }
@@ -66,8 +82,11 @@ public class MarioSession {
         log.info("Writing player session to {}", writer.getLogFile().getAbsolutePath());
 
         try {
+            writer.writeLine("\"" + sessionId + "\": {");
+            writeWorldData();
             writeLevelData();
             writeEvents();
+            writer.writeLine("}");
         } catch (JsonProcessingException e) {
             log.error("Could not process object to json string", e);
             e.printStackTrace();
@@ -87,16 +106,28 @@ public class MarioSession {
     }
 
     public void writeEvents() throws JsonProcessingException {
-        writer.writeLine("// Player Data:");
         for (MarioEvent event : events) {
-            writer.writeLine(mapper.writeValueAsString(event));
+            writer.write(mapper.writeValueAsString(event));
+            if (event.eventType != EventType.SESSION_CLOSE) {
+                writer.write(",");
+            }
+            writer.newLine();
+        }
+    }
+
+    public void writeWorldData() throws JsonProcessingException {
+        for (MarioEvent event : worldDataEvents) {
+            writer.write(mapper.writeValueAsString(event));
+            writer.write(",");
+            writer.newLine();
         }
     }
 
     public void writeLevelData() throws JsonProcessingException {
-        writer.writeLine("// Level Data:");
         for (MarioEvent event : levelDataEvents) {
-            writer.writeLine(mapper.writeValueAsString(event));
+            writer.write(mapper.writeValueAsString(event));
+            writer.write(",");
+            writer.newLine();
         }
     }
 

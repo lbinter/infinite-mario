@@ -144,6 +144,16 @@ Mario.MapState.prototype.NextWorld = function () {
     this.YFarthestCap = 0;
 
 
+    let worldEditorMode = typeof worldApp !== 'undefined';
+
+    if (worldEditorMode) {
+        while (!generated) {
+            generated = this.GenerateLevel();
+        }
+        this.RenderStatic();
+        return;
+    }
+
     let data = null;
     let loadedFromWorldMap = false;
     let curWorld = worldMap[this.WorldNumber + 1];
@@ -166,6 +176,7 @@ Mario.MapState.prototype.NextWorld = function () {
 
     if (!loadedFromWorldMap) {
         curWorld.world = this;
+        logger.world(this);
     }
 
     this.RenderStatic();

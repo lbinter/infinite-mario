@@ -31,6 +31,8 @@ Mario.LevelState = function (difficulty, type) {
 
     this.GotoMapState = false;
     this.GotoLoseState = false;
+
+    this.enemyId = 0;
 };
 
 Mario.LevelState.prototype = new Enjine.GameState();
@@ -59,12 +61,13 @@ Mario.LevelState.prototype.Generate = function (curWorld) {
     this.Level = levelGenerator.CreateLevel(this.LevelType, this.LevelDifficulty);
     curWorld["levels"][Mario.MarioCharacter.LevelString] = this.Level.Save();
     // Only log newly generated levels
-    logger.level(Mario.MarioCharacter.LevelString, this.Level); 
+    logger.level(Mario.MarioCharacter.LevelString, this.Level);
 }
 
 Mario.LevelState.prototype.Enter = function () {
     logger.logKeys = false;
     this.LoadLevel();
+    this.enemyId = 0;
 
     //play music here
     if (this.LevelType === Mario.LevelType.Overground) {
@@ -140,6 +143,7 @@ Mario.LevelState.prototype.Update = function (delta) {
     this.TimeLeft -= delta;
     if ((this.TimeLeft | 0) === 0) {
         Mario.MarioCharacter.Die();
+        logger.die(-1);
     }
 
     if (this.StartTime > 0) {
@@ -203,7 +207,7 @@ Mario.LevelState.prototype.Update = function (delta) {
                 if (st !== null) {
                     if (st.LastVisibleTick !== this.Tick - 1) {
                         if (st.Sprite === null || !this.Sprites.Contains(st.Sprite)) {
-                            st.Spawn(this, x, y, dir);
+                            st.Spawn(this, x, y, dir, this.enemyId++);
                         }
                     }
 
@@ -219,7 +223,10 @@ Mario.LevelState.prototype.Update = function (delta) {
                                 for (i = 0; i < 8; i++) {
                                     this.AddSprite(new Mario.Sparkle(this, x * 16 + 8, y * 16 + ((Math.random() * 16) | 0), Math.random() * dir, 0, 0, 1, 5));
                                 }
-                                this.AddSprite(new Mario.BulletBill(this, x * 16 + 8 + dir * 8, y * 16 + 15, dir));
+                                let bX = x * 16 + 8 + dir * 8;
+                                let bY = y * 16 + 15
+                                this.AddSprite(new Mario.BulletBill(this, bX, bY, dir));
+                                logger.enemySpawn(Mario.Enemy.Bullet, bX, bY);
                                 hasShotCannon = true;
                             }
                         }
@@ -452,12 +459,14 @@ Mario.LevelState.prototype.Bump = function (x, y, canBreakBricks) {
 
         if ((Mario.Tile.Behaviors[block & 0xff] & Mario.Tile.Special) > 0) {
             Enjine.Resources.PlaySound("sprout");
+            let pX = x * 16 + 8;
+            let pY = y * 16 + 8;
             if (!Mario.MarioCharacter.Large) {
-                this.AddSprite(new Mario.Mushroom(this, x * 16 + 8, y * 16 + 8));
-                logger.powerupSpawned("mushroom");
+                this.AddSprite(new Mario.Mushroom(this, pX, pY));
+                logger.powerupSpawned("mushroom", pX, pY);
             } else {
-                this.AddSprite(new Mario.FireFlower(this, x * 16 + 8, y * 16 + 8));
-                logger.powerupSpawned("flower");
+                this.AddSprite(new Mario.FireFlower(this, pX, pY));
+                logger.powerupSpawned("flower", pX, pY);
             }
         } else {
             Mario.MarioCharacter.GetCoin();

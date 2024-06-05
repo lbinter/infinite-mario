@@ -25,12 +25,30 @@ public class MarioLogWriter {
         writer = new BufferedWriter(new FileWriter(logFile));
     }
 
-    public void writeLine(String line) {
+    public void write(String text) {
         try {
-            writer.write(line);
+            writer.write(text);
+        } catch (IOException e) {
+            log.error("Could not write text: " + text, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void writeLine(String text) {
+        try {
+            writer.write(text);
             writer.newLine();
         } catch (IOException e) {
-            log.error("Could not write line: line", e);
+            log.error("Could not write text: " + text, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void newLine() {
+        try {
+            writer.newLine();
+        } catch (IOException e) {
+            log.error("Could not write new line", e);
             e.printStackTrace();
         }
     }
