@@ -3,6 +3,7 @@ package at.jku.cg.binter.infinitemario.websocket;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -14,7 +15,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 public class PlayerInterceptor implements ChannelInterceptor {
 
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {

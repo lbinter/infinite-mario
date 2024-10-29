@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Infinite Mario - Analyse</title>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="webjars/bootstrap/js/bootstrap.min.js" defer></script>
+    <link href="webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <script src="analyse/analyse.js" defer></script>
+
+    <style>
+        .mono {
+            font-family: monospace;
+        }
+
+        select {
+            max-width: 510px;
+        }
+
+        .container-select {
+            max-width: 1600px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <form class="d-flex">
+                <select id="level-difficulty" class="form-select me-2">
+                    <option value="-1">Level Difficulty</option>
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
+                <select id="level-type" class="form-select me-2">
+                    <option value="-1">Level Type</option>
+                    <option value="0" selected>Overground</option>
+                    <option value="1">Underground</option>
+                    <option value="2">Castle</option>
+                </select>
+                <button id="level-generate" type="button" class="btn btn-primary me-4">Generate</button>
+                <button id="level-generate-empty" type="button" class="btn btn-primary me-4">Empty</button>
+                <button id="level-show" type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                    data-bs-target="#show_data">Show</button>
+                <input id="level-load" class="form-control me-2" type="file">
+            </form>
+            <form class="d-flex justify-content-end">
+                <div class="form-check form-switch me-2">
+                    <input id="level-paused" class="btn-check" type="checkbox">
+                    <label class="btn btn-outline-primary" for="level-paused">Paused</label>
+                </div>
+                <div class="form-check form-switch me-1">
+                    <input id="level-bg" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-bg">Background</label>
+                </div>
+                <div class="form-check form-switch me-1">
+                    <input id="level-grid" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-grid">Grid</label>
+                </div>
+                <input id="level-grid-color" type="color" value="#000000" title="Grid color"
+                    class="form-control form-control-color me-1" />
+                <input id="level-grid-active-color" type="color" value="#FF0000" title="Grid active color"
+                    class="form-control form-control-color me-1" />
+                <div class="form-check form-switch me-2">
+                    <input id="level-grid-number" class="btn-check" type="checkbox" checked>
+                    <label class="btn btn-outline-primary" for="level-grid-number">Grid Number</label>
+                </div>
+                <input id="level-grid-number-color" type="color" value="#FFFFFF" title="Grid number color"
+                    class="form-control form-control-color me-2" />
+            </form>
+        </div>
+    </nav>
+    <div class="container container-select text-center">
+        <div class="row">
+            <div class="col">
+                <h4>Available logs</h4>
+                <select id="selectLog" class="form-select mono" multiple size="10" aria-label="log entries">
+                </select>
+                <button id="logs-download" type="button" class="btn btn-success mt-2">Download Selected</button>
+            </div>
+            <div class="col">
+                <h4>Downloaded logs</h4>
+                <select id="selectDownload" class="form-select mono" multiple size="10" aria-label="log entries">
+                </select>
+            </div>
+            <div class="col">
+                <h4>Selected logs</h4>
+                <select id="selectFinished" class="form-select mono" multiple size="10" aria-label="log entries">
+                </select>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

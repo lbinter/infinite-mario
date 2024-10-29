@@ -27,6 +27,11 @@ public class MarioController {
 
         String id = player.getName();
 
+        // TODO check
+        if(log.isDebugEnabled()){
+            log.debug("{}:{}",id,event);
+        }
+
         marioLog.addEvent(id, event);
     }
 }

@@ -1,5 +1,8 @@
 package at.jku.cg.binter.infinitemario.log.session;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,10 @@ public class MarioSession {
     }
 
     public boolean addEvent(MarioEvent event) {
+        return addEvent(event, true);
+    }
+
+    public boolean addEvent(MarioEvent event, boolean autoWrite) {
         if (event == null) {
             return false;
         }
@@ -46,7 +53,9 @@ public class MarioSession {
             }
         } else if (event.eventType == EventType.SESSION_CLOSE) {
             events.add(event);
-            writeToFile();
+            if (autoWrite) {
+                writeToFile();
+            }
         } else {
             events.add(event);
         }
@@ -133,5 +142,46 @@ public class MarioSession {
 
     public void closeSession() {
         writer.finish();
+    }
+
+    public void readFromFile(File logFile) {
+        log.error("Called readFromFile");
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(logFile));
+            String line = reader.readLine();
+            while (line != null) {
+                if (!line.startsWith("{")) {
+                    line = reader.readLine();
+                    continue; // skip lines not containing MarioEvents
+                }
+                try {
+                    MarioEvent event = mapper.readValue(line, MarioEvent.class);
+                    addEvent(event,false);
+                } catch (Exception e) {
+                    log.error("Could not deserialize line" + line, e);
+                }
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (IOException e) {
+            log.error("Could read log file.", e);
+            e.printStackTrace();
+        }
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public List<MarioEvent> getEvents() {
+        return events;
+    }
+
+    public List<MarioEvent> getLevelDataEvents() {
+        return levelDataEvents;
+    }
+
+    public List<MarioEvent> getWorldDataEvents() {
+        return worldDataEvents;
     }
 }
