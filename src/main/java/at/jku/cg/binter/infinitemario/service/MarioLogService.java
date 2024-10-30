@@ -3,6 +3,8 @@ package at.jku.cg.binter.infinitemario.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,9 @@ public class MarioLogService {
             log.error("Could not find log folder:" + config.getLogFolder());
         } else {
             File[] files = logFolder.listFiles();
-            for (File file : files) {
-                list.add(new LogEntry(file));
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified));
+            for (int i = files.length-1; i >= 0; i--) {
+                list.add(new LogEntry(files[i]));
             }
         }
 
