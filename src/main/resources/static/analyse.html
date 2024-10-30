@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="dark">
 
 <head>
     <title>Infinite Mario - Analyse</title>
+    <meta charset="utf-8">
     <script src="/webjars/jquery/jquery.min.js"></script>
     <script src="webjars/bootstrap/js/bootstrap.min.js" defer></script>
     <link href="webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-
+    <link rel="prefetch" href="/images/bgsheet.png" />
+    <link rel="prefetch" href="/images/mapsheet.png" />
     <script src="analyse/analyse.js" defer></script>
 
     <style>
@@ -19,8 +21,8 @@
             max-width: 510px;
         }
 
-        .container-select {
-            max-width: 1600px;
+        .container-custom {
+            min-width: 1600px;
         }
     </style>
 </head>
@@ -29,72 +31,87 @@
     <nav class="navbar">
         <div class="container-fluid">
             <form class="d-flex">
-                <select id="level-difficulty" class="form-select me-2">
-                    <option value="-1">Level Difficulty</option>
-                    <option value="1" selected>1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                </select>
-                <select id="level-type" class="form-select me-2">
-                    <option value="-1">Level Type</option>
-                    <option value="0" selected>Overground</option>
-                    <option value="1">Underground</option>
-                    <option value="2">Castle</option>
-                </select>
-                <button id="level-generate" type="button" class="btn btn-primary me-4">Generate</button>
-                <button id="level-generate-empty" type="button" class="btn btn-primary me-4">Empty</button>
-                <button id="level-show" type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
-                    data-bs-target="#show_data">Show</button>
-                <input id="level-load" class="form-control me-2" type="file">
             </form>
             <form class="d-flex justify-content-end">
-                <div class="form-check form-switch me-2">
-                    <input id="level-paused" class="btn-check" type="checkbox">
-                    <label class="btn btn-outline-primary" for="level-paused">Paused</label>
-                </div>
-                <div class="form-check form-switch me-1">
-                    <input id="level-bg" class="btn-check" type="checkbox" checked>
-                    <label class="btn btn-outline-primary" for="level-bg">Background</label>
-                </div>
-                <div class="form-check form-switch me-1">
-                    <input id="level-grid" class="btn-check" type="checkbox" checked>
-                    <label class="btn btn-outline-primary" for="level-grid">Grid</label>
-                </div>
-                <input id="level-grid-color" type="color" value="#000000" title="Grid color"
-                    class="form-control form-control-color me-1" />
-                <input id="level-grid-active-color" type="color" value="#FF0000" title="Grid active color"
-                    class="form-control form-control-color me-1" />
-                <div class="form-check form-switch me-2">
-                    <input id="level-grid-number" class="btn-check" type="checkbox" checked>
-                    <label class="btn btn-outline-primary" for="level-grid-number">Grid Number</label>
-                </div>
-                <input id="level-grid-number-color" type="color" value="#FFFFFF" title="Grid number color"
-                    class="form-control form-control-color me-2" />
             </form>
         </div>
     </nav>
-    <div class="container container-select text-center">
+
+    <div class="container container-custom text-center">
+        <div class="input-group mt-5 mb-3">
+            <input type="file" class="form-control" id="survey">
+            <label class="input-group-text" for="survey">Upload survey (csv)</label>
+            <button class="btn btn-primary" type="button" id="parse-survey">Parse</button>
+        </div>
+        <div class="form-check form-switch text-start mt-4">
+            <input class="form-check-input" type="checkbox" role="switch" id="switch-world-server" checked>
+            <label class="form-check-label text-start" for="switch-world-server">Use server side world file or choose
+                upload below</label>
+        </div>
+        <div class="input-group mb-5">
+            <input type="file" class="form-control" id="world-file">
+            <label class="input-group-text" for="world-file">Upload world file</label>
+            <button class="btn btn-primary" type="button" id="parse-world">Parse</button>
+        </div>
+        <hr class="mb-5">
         <div class="row">
             <div class="col">
                 <h4>Available logs</h4>
                 <select id="selectLog" class="form-select mono" multiple size="10" aria-label="log entries">
                 </select>
-                <button id="logs-download" type="button" class="btn btn-success mt-2">Download Selected</button>
+                <button class="btn btn-warning m-2" type="button" id="remove-empty">Remove empty logs</button>
+                <button class="btn btn-warning m-2" type="button" id="filter-survey">Filter Survey</button>
+                <button id="logs-download" type="button" class="btn btn-success m-2">Download Selected</button>
             </div>
             <div class="col">
                 <h4>Downloaded logs</h4>
                 <select id="selectDownload" class="form-select mono" multiple size="10" aria-label="log entries">
                 </select>
+                <button id="logs-add" type="button" class="btn btn-success m-2">Add Selected</button>
+                <button id="logs-detail-downloaded" type="button" class="btn btn-info m-2" data-bs-toggle="modal"
+                    data-bs-target="#show_detail">Show Detail</button>
             </div>
             <div class="col">
                 <h4>Selected logs</h4>
                 <select id="selectFinished" class="form-select mono" multiple size="10" aria-label="log entries">
                 </select>
+                <button id="logs-remove" type="button" class="btn btn-danger m-2">Remove Selected</button>
+                <button id="logs-detail-selected" type="button" class="btn btn-info m-2" data-bs-toggle="modal"
+                    data-bs-target="#show_detail">Show Detail</button>
+                <button id="logs-remove" type="button" class="btn btn-secondary m-2"
+                    onclick="updateGenerateLevelButtons()">Update Level Buttons</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container container-custom mt-5" id="generate-ui">
+
+    </div>
+
+    <div class="container container-custom mt-5">
+        <hr>
+    </div>
+
+    <div class="container container-custom mt-5" id="canvas-container">
+    </div>
+
+    <div class="modal fade" id="show_detail" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="labelShowDetail" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="labelShowDetail">Log Data Raw</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="logDetailTabList" role="tablist">
+                    </ul>
+                    <div class="tab-content" id="logDetailTabs">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
