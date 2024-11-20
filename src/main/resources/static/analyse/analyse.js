@@ -25,7 +25,8 @@ var availableLogsId = "selectLog";
 var downloadedLogsId = "selectDownload";
 var selectedLogsId = "selectFinished";
 
-var s_questions = [], s_answers = [];
+var s_questions = [], s_answers = [], s_answers_buttons = [], s_answers_colors = [], s_answers_colors_buttons = [];
+var s_selected = [];
 
 var generateLevelButtons = [];
 
@@ -122,11 +123,18 @@ $(document).ready(function () {
         let file = $("#survey").get(0).files[0];
         let reader = new FileReader();
         reader.onload = function (event) {
+            logs.drawPlayerMovement = true;
+            logs.drawPlayerDeath = true;
             // get plain text  from base64 
             let decoded = atob(event.target.result.split(',')[1]);
             let lines = decoded.split("\r\n");
             let i = 0;
             s_questions = lines[0].replace("\r", "").split(',');
+            for (i = 0; i < s_questions.length; i++) {
+                s_answers[i] = [];
+                s_answers_buttons[i] = [];
+                s_answers_colors[i] = [];
+            }
             for (i = 1; i < lines.length; i++) {
                 let answers = lines[i].replace("\r", "").split(',');
                 if (logs[answers[1] + ".log"] == undefined) {
@@ -136,12 +144,20 @@ $(document).ready(function () {
                 logs[answers[1] + ".log"].survey = {};
                 logs[answers[1] + ".log"].survey.timestamp = answers[0];
                 logs[answers[1] + ".log"].survey.gender = answers[2];
+                addAnswer(2, answers[2]);
                 logs[answers[1] + ".log"].survey.age = answers[3];
+                addAnswer(3, answers[3]);
                 logs[answers[1] + ".log"].survey.experience = {};
                 logs[answers[1] + ".log"].survey.experience.computerGames = answers[4];
+                addAnswer(4, answers[4]);
                 logs[answers[1] + ".log"].survey.experience.mario = answers[5];
+                addAnswer(5, answers[5]);
                 logs[answers[1] + ".log"].survey.experience.keyboard = answers[6];
+                addAnswer(6, answers[6]);
                 logs[answers[1] + ".log"].survey.comments = answers[7];
+            }
+            for (i = 0; i < s_questions.length; i++) {
+                s_answers[i].sort();
             }
             console.log("Loaded survey from file");
             //alert("Survey Data loaded!");
@@ -206,6 +222,33 @@ $(document).ready(function () {
     });
 });
 
+function getSurveyDataByID(logFileName, answerId) {
+    switch (answerId) {
+        case 0:
+            return logs[logFileName].survey.timestamp;
+        case 1:
+            return getLogId(logFileName);
+        case 2:
+            return logs[logFileName].survey.gender;
+        case 3:
+            return logs[logFileName].survey.age;
+        case 4:
+            return logs[logFileName].survey.experience.computerGames;
+        case 5:
+            return logs[logFileName].survey.experience.mario;
+        case 6:
+            return logs[logFileName].survey.experience.keyboard;
+        case 7:
+            return logs[logFileName].survey.comments;
+    }
+}
+
+function addAnswer(qID, answer) {
+    if (!s_answers[qID].includes(answer)) {
+        s_answers[qID].push(answer);
+    }
+}
+
 var logData; var logFile;
 
 async function downloadLogFile(logFileName) {
@@ -259,6 +302,10 @@ function addSelectedLog(logFileName) {
         value: logFileName,
         text: logFileName + ' | ' + humanFileSize(logs[logFileName].size)
     }));
+    logs[logFileName].selected = true;
+    logs[logFileName].drawPlayerMovement = true;
+    logs[logFileName].drawPlayerDeath = true;
+    filterPlayerData(logFileName);
 }
 
 function removeSelectedLog(logFileName) {
@@ -269,6 +316,9 @@ function removeSelectedLog(logFileName) {
         value: logFileName,
         text: logFileName + ' | ' + humanFileSize(logs[logFileName].size)
     }));
+    logs[logFileName].selected = false;
+    logs[logFileName].drawPlayerMovement = false;
+    logs[logFileName].drawPlayerDeath = false;
 }
 
 function humanFileSize(size) {
@@ -619,10 +669,22 @@ var sizeMultiplier = 32;
 
 function createGridUi(levelId, levelData) {
     let form = $('<form>', {
-        class: "d-flex mb-2"
+        class: "d-flex m-2"
     });
 
-    let gridSwitch = createSwitchButton("grid_" + levelId, "Grid", levelData.drawGrid, " ps-0");
+    let update = $('<button>', {
+        type: "button",
+        class: "btn btn-warning",
+        id: "updateLevel" + levelId,
+    });
+    update.append(document.createTextNode("Update"));
+
+    update.click(function () {
+        drawLevel(levelId, levelData);
+    });
+    form.append(update);
+
+    let gridSwitch = createSwitchButton("grid_" + levelId, "Grid", levelData.drawGrid);
     let chooserGrid = createColorChooser("grid_color_" + levelId, "Grid Color", levelData.GridColor);
     form.append(gridSwitch);
     form.append(chooserGrid);
@@ -632,18 +694,11 @@ function createGridUi(levelId, levelData) {
     form.append(gridNumber);
     form.append(chooserGridNumber);
 
-    let playerMovement = $('<button>', {
-        type: "button",
-        class: "btn btn-primary ms-5",
-        id: "updateLevel" + levelId,
-    });
-    playerMovement.append(document.createTextNode("Draw Player Movement from selected logs"));
+    let drawPlayerMovement = createSwitchButton("drawPlayerMovement" + levelId, "Draw Player Movement", logs.drawPlayerMovement);
+    form.append(drawPlayerMovement);
 
-    playerMovement.click(function () {
-        drawPlayerMovement(levelId, levelData);
-    });
-
-    form.append(playerMovement);
+    let drawPlayerDeath = createSwitchButton("drawPlayerDeath" + levelId, "Draw Player Death", logs.drawPlayerDeath);
+    form.append(drawPlayerDeath);
 
     canvasContainer.append(form);
 
@@ -653,7 +708,6 @@ function createGridUi(levelId, levelData) {
     })
     $("#grid_color_" + levelId).on('input', function () {
         levelData.GridColor = this.value;
-        drawLevel(levelId, levelData);
     });
     $("#gridNumber_" + levelId).click(function () {
         levelData.DrawGridNumber = !levelData.DrawGridNumber;
@@ -661,31 +715,15 @@ function createGridUi(levelId, levelData) {
     })
     $("#grid_color_number_" + levelId).on('input', function () {
         levelData.GridNumberColor = this.value;
+    });
+    $("#drawPlayerMovement" + levelId).click(function () {
+        logs.drawPlayerMovement = !logs.drawPlayerMovement;
         drawLevel(levelId, levelData);
-    });
-}
-
-function drawPlayerMovement(levelId, levelData) {
-    // todo use layers 
-    // clear canvas and draw level
-    drawLevel(levelId, levelData);
-
-    $("#" + selectedLogsId + " > option").each(function () {
-        let logFileName = this.value;
-        //ensure player positon data is filtered
-        checkPlayerData(logFileName);
-        drawPlayerPositionData(logFileName, levelId);
-        drawPlayerDeathData(logFileName, levelId);
-    });
-
-}
-
-function checkPlayerData(logFileName) {
-    if (logs[logFileName].movement == undefined) {
-        logs[logFileName].movement = {};
-        // traverse events and filter position events for given level
-        filterPlayerData(logFileName);
-    }
+    })
+    $("#drawPlayerDeath" + levelId).click(function () {
+        logs.drawPlayerDeath = !logs.drawPlayerDeath;
+        drawLevel(levelId, levelData);
+    })
 }
 
 function filterPlayerData(logFileName) {
@@ -696,6 +734,9 @@ function filterPlayerData(logFileName) {
     let currentPosEvents = [];
     let curLevelId;
     let lastPosEvent;
+    if (logs[logFileName].movement == undefined) {
+        logs[logFileName].movement = {};
+    }
     for (const [key, value] of Object.entries(events)) {
         switch (value.event) {
             case "START":
@@ -785,14 +826,14 @@ function createLevel(levelId, levelData) {
     header.append(document.createTextNode("Level " + levelId));
     canvasContainer.append(header);
 
-    createGridUi(levelId, levelData);
-
     let canvas = $('<canvas/>', {
         'class': "level mr-5",
         'id': "canvas_" + levelId,
         'style': "border:1px solid #FFFFFF"
     });
     canvasContainer.append(canvas);
+    createGridUi(levelId, levelData);
+    updateLevelOptions();
     drawLevel(levelId, levelData);
 }
 
@@ -850,6 +891,47 @@ function drawLevel(levelId, levelData) {
             }
         }
     }
+
+    drawData(levelId);
+}
+
+function drawData(levelId) {
+    for (const [logFileName, data] of Object.entries(logs)) {
+        if (!data.selected) {
+            continue;
+        }
+
+        // filter survey
+        let skip = false;
+        for (let i = 0; i < s_answers_buttons.length; i++) {
+            if (s_answers_buttons[i].length == 0) {
+                continue;
+            }
+            let found = false;
+            let answer = getSurveyDataByID(logFileName, i);
+            for (let j = 0; j < s_answers_buttons[i].length; j++) {
+                if ($("#" + s_answers_buttons[i][j]).is(":checked")) {
+                    if (answer == s_answers[i][j]) {
+                        found = true;
+                    }
+                }
+            }
+            if (!found) {
+                skip = true;
+            }
+        }
+        if (skip) {
+            continue;
+        }
+
+        // draw if global flags allow
+        if (logs.drawPlayerMovement && data.drawPlayerMovement) {
+            drawPlayerPositionData(logFileName, levelId);
+        }
+        if (logs.drawPlayerDeath && data.drawPlayerDeath) {
+            drawPlayerDeathData(logFileName, levelId);
+        }
+    }
 }
 
 function drawPlayerPositionData(logFileName, levelId) {
@@ -861,24 +943,24 @@ function drawPlayerPositionData(logFileName, levelId) {
     let playerRuns = logs[logFileName].movement[levelId];
 
     for (i = 0; i < playerRuns.length; i++) {
-        drawPlayerFromPoints(levelId, playerRuns[i]);
+        drawPlayerFromPoints(levelId, playerRuns[i], logFileName);
     }
 }
 
 const pointScale = 2;
 
 // based on https://stackoverflow.com/questions/7054272/how-to-draw-smooth-curve-through-n-points-using-javascript-html5-canvas
-function drawPlayerFromPoints(levelId, posData) {
+function drawPlayerFromPoints(levelId, posData, logFileName) {
     if (posData == undefined || posData.length == 0) {
         return;
     }
     const canvas = document.getElementById("canvas_" + levelId);
     const context = canvas.getContext("2d");
 
-    let fillStyle = context.fillStyle;
+    let strokeStyle = context.strokeStyle;
 
     context.beginPath();
-    context.fillStyle = "purple";
+    context.strokeStyle = getPlayerMovementColor(logFileName);
     context.moveTo(posData[0].x, posData[0].y);
 
     let i;
@@ -893,7 +975,26 @@ function drawPlayerFromPoints(levelId, posData) {
 
     context.stroke();
 
-    context.fillStyle = fillStyle;
+    context.strokeStyle = strokeStyle;
+}
+
+function getPlayerMovementColor(logFileName) {
+    let defaultColor = "#00000";
+    for (let i = 0; i < s_answers.length; i++) {
+        let useColor = $("#color_answer_" + i);
+        if (useColor.length == 0) {
+            continue;
+        }
+        if (useColor.is(":checked")) {
+            let answer = getSurveyDataByID(logFileName, i);
+            let j = s_answers[i].indexOf(answer);
+            if (j == -1) {
+                return defaultColor;
+            }
+            return s_answers_colors[i][j];
+        }
+    }
+    return defaultColor;
 }
 
 function drawPlayerDeathData(logFileName, levelId) {
@@ -968,4 +1069,91 @@ function updateGenerateLevelButtons() {
             }
         }
     });
+}
+
+function updateLevelOptions() {
+    let container = $("#survey_filter");
+    if (container.length != 0) {
+        container.empty();
+    } else {
+        container = $('<div>', {
+            class: "container container-custom mb-5",
+            id: "survey_filter"
+        });
+    }
+
+    let title = $('<h3>', {});
+    title.append(document.createTextNode("Filter by Survey Data"));
+    container.append(title);
+    for (let i = 0; i < s_questions.length; i++) {
+        if (s_answers[i].length == 0) {
+            continue;
+        }
+
+        let text = document.createTextNode(s_questions[i].replace('\nPlease rate your experience:', '').replaceAll('"', ''));
+        let header = $('<h5>', {});
+        header.append(text);
+        container.append(header);
+
+        let form = $('<form>', {
+            class: "d-flex mb-2"
+        });
+
+        let useColor = createSwitchButton("color_answer_" + i, "Use Color", false, " ps-0 pe-2");
+        s_answers_colors_buttons.push("color_answer_" + i);
+        useColor.click(function () {
+            for (let j = 0; j < s_answers_colors_buttons.length; j++) {
+                if (s_answers_colors_buttons[j] != "color_answer_" + i) {
+                    $("#" + s_answers_colors_buttons[j]).prop("checked", false);
+                }
+            }
+        })
+        form.append(useColor);
+
+        let toggleAll = $('<button>', {
+            type: "button",
+            class: "btn btn-success",
+            id: "toggle_" + i,
+        });
+        toggleAll.append(document.createTextNode("Select All"));
+
+        toggleAll.click(function () {
+            var $this = $(this);
+            let select;
+            if ($this.hasClass('btn-success')) {
+                $this.removeClass('btn-success');
+                $this.addClass('btn-danger');
+                $this.text('Deselect All');
+                select = true;
+            } else {
+                $this.removeClass('btn-danger');
+                $this.addClass('btn-success');
+                $this.text('Select All');
+                select = false;
+            }
+            for (let j = 0; j < s_answers_buttons[i].length; j++) {
+                $("#" + s_answers_buttons[i][j]).prop("checked", select);
+            }
+        });
+
+        form.append(toggleAll);
+        for (let j = 0; j < s_answers[i].length; j++) {
+            let button;
+            let answer = s_answers[i][j];
+            let id = "answer_" + i + "_" + j;
+            button = createSwitchButton(id, answer, true);
+            s_answers_buttons[i].push(id);
+            s_answers_colors[i][j] = "#000000";
+
+            let colorChooser = createColorChooser("color_" + id, "Color for '" + answer + "'", s_answers_colors[i][j]);
+            form.append(button);
+            form.append(colorChooser);
+
+            colorChooser.on('input', function () {
+                s_answers_colors[i][j] = this.value;
+            });
+        }
+        container.append(form);
+    }
+    canvasContainer.append(container);
 }
